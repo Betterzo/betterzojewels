@@ -52,8 +52,13 @@ const Header = () => {
             href="/"
             className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-purple-700 hover:to-pink-700 transition-all"
           >
-            <Sparkles className="h-7 w-7 text-purple-600" />
-            Jewtone
+            {/* <Sparkles className="h-7 w-7 text-purple-600" />
+            Jewtone */}
+            <img
+              src="/logo-1.png"
+              alt="Jewtone Logo"
+              className="h-24 w-64 object-contain bg-transparent"
+            />
           </Link>
 
           {/* Desktop Navigation */}

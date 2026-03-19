@@ -14,10 +14,15 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-6 w-6 text-pink-400" />
+              {/* <Sparkles className="h-6 w-6 text-pink-400" />
               <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wide">
                 Jewtone
-              </h3>
+              </h3> */}
+              <img
+                src="/logo.jpeg"
+                alt="Jewtone Logo"
+                className="h-24 w-48 object-contain  bg-transparent rounded-md shadow-lg"
+              />
             </div>
             <p className="text-slate-300 leading-relaxed">
               Discover the finest collection of jewelry and precious stones,
