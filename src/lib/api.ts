@@ -1,17 +1,20 @@
 import axios from "axios";
+import { connect } from "http2";
 
 const api = axios.create({
-  baseURL: "https://api.jewtone.com/api/v1",
-  // baseURL: "http://192.168.1.5:8100/api/v1",
+  // baseURL: "https://api.jewtone.com/api/v1",
+  baseURL: "https://api.betterzojewels.com/api/v1",
 });
 
 export const getCategories = async () => {
   const res = await api.get('/categories');
+  // console.log("categories", res.data.data.data); // log the categories data
   return res.data.data.data; // returns the array of categories
 };
 
 export const getProducts = async () => {
   const res = await api.get('/products');
+  // console.log("products", res.data.data.data); // log the products data
   return res.data.data.data; // returns the array of products
 };
 
@@ -138,6 +141,7 @@ export const getCartItems = async () => {
   const res = await api.get('/cart', {
     headers: { Authorization: `Bearer ${token}` }
   });
+  // console.log("Cart Items Response:", res.data); // log the cart items response for debugging
   return res.data;
 };
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
@@ -91,9 +91,17 @@ export default function CategoryClient({ category, products }: CategoryClientPro
     return filtered;
   }, [products, searchQuery, priceRange, selectedMaterials, sortBy]);
 
+  useEffect(() => {
+  if (products.length) {
+    const max = Math.max(...products.map(p => parseFloat(p.price)));
+    setPriceRange([0, max]);
+  }
+}, [products]);
+
   const maxPrice = useMemo(() => {
     return Math.max(...products.map(p => parseFloat(p.price)), 100000);
   }, [products]);
+
 
   const handleMaterialToggle = (material: string) => {
     setSelectedMaterials(prev =>
@@ -217,56 +225,54 @@ export default function CategoryClient({ category, products }: CategoryClientPro
           </div>
 
           {/* Advanced Filters Panel */}
-          {showFilters && (
-            <div className="mt-6 p-6 bg-white rounded-2xl border-2 border-purple-100 shadow-lg animate-fadeIn">
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Price Range */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3">
-                    Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
-                  </label>
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={maxPrice}
-                    min={0}
-                    step={100}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-slate-500 mt-2">
-                    <span>$0</span>
-                    <span>${maxPrice.toLocaleString()}</span>
-                  </div>
-                </div>
+          {/* Advanced Filters Panel */}
+{showFilters && (
+  <div className="mt-6 p-4 sm:p-6 bg-white rounded-2xl border-2 border-purple-100 shadow-lg animate-fadeIn">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+      
+      {/* Price Range */}
+      <div className="flex flex-col">
+        <label className="text-sm font-semibold text-slate-700 mb-2">
+          Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+        </label>
+        <Slider
+          value={priceRange}
+          onValueChange={setPriceRange}
+          min={0}
+          max={maxPrice}
+          step={100}
+          className="w-full"
+        />
+        <div className="flex justify-between text-xs text-slate-500 mt-1">
+          <span>$0</span>
+          <span>${maxPrice.toLocaleString()}</span>
+        </div>
+      </div>
 
-                {/* Materials */}
-                {materials.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-3">
-                      Material
-                    </label>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {materials.map((material) => (
-                        <div key={material} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={material}
-                            checked={selectedMaterials.includes(material)}
-                            onCheckedChange={() => handleMaterialToggle(material)}
-                          />
-                          <label
-                            htmlFor={material}
-                            className="text-sm text-slate-700 cursor-pointer hover:text-purple-600"
-                          >
-                            {material}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+      {/* Materials */}
+      {materials.length > 0 && (
+        <div className="flex flex-col max-h-40 overflow-y-auto">
+          <label className="text-sm font-semibold text-slate-700 mb-2">Material</label>
+          <div className="flex flex-col space-y-2">
+            {materials.map(material => (
+              <div key={material} className="flex items-center space-x-2">
+                <Checkbox
+                  id={material}
+                  checked={selectedMaterials.includes(material)}
+                  onCheckedChange={() => handleMaterialToggle(material)}
+                />
+                <label htmlFor={material} className="text-sm text-slate-700 cursor-pointer hover:text-purple-600">
+                  {material}
+                </label>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+        </div>
+      )}
+
+    </div>
+  </div>
+)}
         </div>
       </section>
 

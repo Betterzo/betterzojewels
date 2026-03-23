@@ -106,7 +106,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         price: Number(item.price),
         quantity: item.quantity,
         featured_image: item.product?.featured_image,
-        category: item.product?.category_id,
+        category: item.product?.category?.name,
       }));
       setItems(serverItems);
     } catch (e) {

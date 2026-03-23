@@ -30,6 +30,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     const { category } = await params;
     const categoryData = await getCategoryBySlug(category);
     const products = await getProductsByCategorySlug(category);
+    // console.log("Category Data:", categoryData);
+    console.log("Products:", products);
     return <CategoryClient category={categoryData} products={products || []} />;
   } catch (error: any) {
     console.error('Error loading category page:', error);

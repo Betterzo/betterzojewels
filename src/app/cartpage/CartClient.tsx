@@ -20,6 +20,7 @@ export default function CartClient() {
   useEffect(() => {
     setMounted(true);
   }, []);
+  // console.log("cart items", items); // log cart items for debugging
 
   if (!mounted) {
     return (
@@ -125,86 +126,88 @@ export default function CartClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <Card key={item.id} className="overflow-hidden border border-purple-100/50 hover:border-purple-300 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-5">
-                    {/* Product Image */}
-                    <div className="flex-shrink-0">
-                      <img
-                        src={item.featured_image || '/dummy.jpg'}
-                        alt={item.name}
-                        className="w-28 h-28 object-cover rounded-2xl border border-purple-100/50 shadow-md"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "/dummy.jpg";
-                        }}
-                      />
-                    </div>
+  {items.map((item) => (
+    <Card
+      key={item.id}
+      className="overflow-hidden border border-purple-100/50 hover:border-purple-300 shadow-xl hover:shadow-2xl transition-all duration-300 bg-white rounded-2xl"
+    >
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-5 space-y-4 sm:space-y-0">
+          
+          {/* Product Image */}
+          <div className="flex-shrink-0 w-full sm:w-28">
+            <img
+              src={item.featured_image || '/dummy.jpg'}
+              alt={item.name}
+              className="w-full h-48 sm:h-28 object-cover rounded-2xl border border-purple-100/50 shadow-md"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/dummy.jpg";
+              }}
+            />
+          </div>
 
-                    {/* Product Details */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-slate-800 truncate mb-1.5">
-                        {item.name}
-                      </h3>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-3">
-                        {item.category || 'Uncategorized'}
-                      </p>
-                      <p className="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        ${Number(item.price).toLocaleString()}
-                      </p>
-                    </div>
+          {/* Product Details */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-bold text-slate-800 truncate mb-1.5">
+              {item.name}
+            </h3>
+            <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-3">
+              {item.category || 'Uncategorized'}
+            </p>
+            <p className="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              ${Number(item.price).toLocaleString()}
+            </p>
 
-                    {/* Quantity Controls */}
-                    <div className="flex items-center space-x-2 border border-purple-200/50 rounded-full bg-purple-50/30 px-2 py-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
-                        disabled={item.quantity <= 1}
-                        className="rounded-full hover:bg-purple-100 text-purple-600 h-8 w-8 p-0"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-10 text-center font-bold text-slate-800">
-                        {item.quantity}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        className="rounded-full hover:bg-purple-100 text-purple-600 h-8 w-8 p-0"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {/* Remove Button */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveItem(item.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            {/* Clear Cart Button */}
-            <div className="flex justify-end">
+            {/* Quantity Controls */}
+            <div className="flex flex-wrap items-center space-x-2 border border-purple-200/50 rounded-full bg-purple-50/30 px-2 py-1 mt-2 sm:mt-4">
               <Button
-                variant="outline"
-                onClick={handleClearCart}
-                className="text-red-600 border-2 border-red-600 hover:bg-red-50 rounded-full px-6"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
+                disabled={item.quantity <= 1}
+                className="rounded-full hover:bg-purple-100 text-purple-600 h-8 w-8 p-0"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Clear Cart
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="w-10 text-center font-bold text-slate-800">{item.quantity}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                className="rounded-full hover:bg-purple-100 text-purple-600 h-8 w-8 p-0"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+
+              {/* Remove Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRemoveItem(item.id)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full ml-auto sm:ml-2 mt-2 sm:mt-0"
+              >
+                <Trash2 className="h-5 w-5" />
               </Button>
             </div>
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  ))}
+
+  {/* Clear Cart Button */}
+  <div className="flex justify-end mt-4">
+    <Button
+      variant="outline"
+      onClick={handleClearCart}
+      className="text-red-600 border-2 border-red-600 hover:bg-red-50 rounded-full px-6"
+    >
+      <Trash2 className="mr-2 h-4 w-4" />
+      Clear Cart
+    </Button>
+  </div>
+</div>
 
           {/* Order Summary */}
           <div className="lg:col-span-1">

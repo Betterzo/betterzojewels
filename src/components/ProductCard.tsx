@@ -11,7 +11,7 @@ interface Product {
   name: string;
   price: number;
   featured_image: string;
-  category: string;
+  category: { name: string };
   quantity: number;
   description?: string;
 }
@@ -33,7 +33,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         name: product.name,
         price: product.price,
         featured_image: product.featured_image,
-        category: product.category
+        category: product.category.name,
       });
       toast.success(`${product.name} added to cart!`);
     } catch (error) {
@@ -71,7 +71,7 @@ return (
       </Link>
 
       <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
-        {product.category}
+        {product.category.name}
       </p>
 
       <div className="flex items-center justify-between pt-4 border-t border-purple-100/50">

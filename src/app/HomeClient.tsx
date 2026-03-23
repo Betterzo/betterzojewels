@@ -8,6 +8,7 @@ import ProductCard from "@/components/ProductCard";
 import { getCategories, getProducts } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { LoadingPage } from "@/components/ui/loading";
+import { get } from "http";
 
 export default function HomeClient() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -15,93 +16,43 @@ export default function HomeClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
-  const dummyCategories = [
-  {
-    name: "Rings",
-    slug: "rings",
-    image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800",
-  },
-  {
-    name: "Necklaces",
-    slug: "necklaces",
-    image:
-      "https://images.unsplash.com/photo-1596944924591-1168bd3dbfc7?w=800",
-  },
-  {
-    name: "Bracelets",
-    slug: "bracelets",
-    image:
-      "https://images.unsplash.com/photo-1583292650898-7d22cd27ca6f?w=800",
-  },
-  {
-    name: "Earrings",
-    slug: "earrings",
-    image:
-      "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=800",
-  },
-];
 
-const dummyProducts = [
-  {
-    id: "1",
-    product_id: 1,
-    name: "Diamond Engagement Ring",
-    price: 49999,
-    featured_image:
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800",
-    category: "Rings",
-    description: "Elegant diamond ring crafted for timeless love.",
-    quantity: 1,
-  },
-  {
-    id: "2",
-    product_id: 2,
-    name: "Gold Luxury Necklace",
-    price: 35999,
-    featured_image:
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800",
-    category: "Necklaces",
-    description: "Premium handcrafted gold necklace.",
-    quantity: 1,
-  },
-  {
-    id: "3",
-    product_id: 3,
-    name: "Classic Pearl Earrings",
-    price: 18999,
-    featured_image:
-      "https://images.unsplash.com/photo-1588444650700-6f8c9f79c1b8?w=800",
-    category: "Earrings",
-    description: "Minimal pearl elegance for every occasion.",
-    quantity: 1,
-  },
-  {
-    id: "4",
-    product_id: 4,
-    name: "Luxury Gold Bracelet",
-    price: 24999,
-    featured_image:
-      "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800",
-    category: "Bracelets",
-    description: "Refined bracelet crafted in premium gold.",
-    quantity: 1,
-  },
-];
+  // useEffect(() => {
+  //   setMounted(true);
+  //   Promise.all([getCategories(), getProducts()])
+  //     .then(([catData, prodData]) => {
+  //       setCategories(catData);
+  //       console.log("Fetched Categories:", catData);
+  //       setProducts(prodData);
+  //     })
+  //     .catch(() => setError("Failed to load data."))
+  //     .finally(() => setLoading(false));
+  // }, []);
+
 
   useEffect(() => {
-    setMounted(true);
-    Promise.all([getCategories(), getProducts()])
-      .then(([catData, prodData]) => {
-        setCategories(catData);
-        // console.log("Fetched Categories:", catData);
-        setProducts(prodData);
-      })
-      .catch(() => setError("Failed to load data."))
-      .finally(() => setLoading(false));
-  }, []);
+      const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try{
+          const res= await getCategories();
+          setCategories(res);
+          // console.log("Fetched Categories:", res);
 
-  // if (!mounted || loading) return <LoadingPage />;
+          const prodRes = await getProducts();
+          setProducts(prodRes.slice(0, 4)); // Set only the first 4 products for featured
+          // console.log("Fetched Products:", prodRes);
+        } catch (err) {
+          setError("Failed to load data.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchData();
+      setMounted(true);
+  }, []);
+  if (!mounted || loading) return <LoadingPage />;
 
   // if (error) {
   //   return (
@@ -117,49 +68,40 @@ const dummyProducts = [
   //   href: `/category/${cat.slug}`,
   // }));
 
-  const safeCategories =
-  categories && categories.length > 0 ? categories : dummyCategories;
 
-const mappedCategories = safeCategories.map((cat: any) => ({
-  name: cat.name,
-  image: cat.image,
-  href: `/category/${cat.slug}`,
-}));
+  // console.log("categories", categories);
+  
 
-  // const featuredProducts = products.slice(0, 4).map((prod: any) => ({
-  //   id: prod.id.toString(),
-  //   product_id: prod.id,
-  //   name: prod.name,
-  //   price: Number(prod.price),
-  //   featured_image:
-  //     prod.featured_image ||
-  //     "https://via.placeholder.com/400x400?text=No+Image",
-  //   category:
-  //     categories.find((cat: any) => cat.id === prod.category_id)?.name ||
-  //     "Uncategorized",
-  //   description: prod.description || "",
-  //   quantity: 1,
-  // }));
+// const mappedCategories = safeCategories.map((cat: any) => ({
+//   name: cat.name,
+//   image: cat.image,
+//   href: `/category/${cat.slug}`,
+// }));
 
 
-  const safeProducts =
-  products && products.length > 0 ? products : dummyProducts;
+  // console.log("mappedCategories", mappedCategories);
+  // console.log("featuredProducts", featuredProducts);
 
-const featuredProducts = safeProducts.slice(0, 4).map((prod: any) => ({
-  id: prod.id.toString(),
-  product_id: prod.product_id || prod.id,
-  name: prod.name,
-  price: Number(prod.price),
-  featured_image:
-    prod.featured_image ||
-    "https://via.placeholder.com/400x400?text=No+Image",
-  category:
-    prod.category ||
-    categories.find((cat: any) => cat.id === prod.category_id)?.name ||
-    "Jewelry",
-  description: prod.description || "",
-  quantity: 1,
-}));
+ 
+
+  // console.log("safeProducts", safeProducts);
+
+// const featuredProducts = safeProducts.slice(0, 4).map((prod: any) => ({
+//   id: prod.id,
+//   product_id: prod.product_id || prod.id,
+//   name: prod.name,
+//   price: Number(prod.price),
+//   featured_image:
+//     prod.featured_image ||
+//     "https://via.placeholder.com/400x400?text=No+Image",
+//   category:
+//     prod.category ||
+//     categories.find((cat: any) => cat.id === prod.category_id)?.name ||
+//     "Jewelry",
+//   description: prod.description || "",
+//   quantity: 1,
+// }));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20 text-slate-900">
       <Header />
@@ -240,10 +182,10 @@ const featuredProducts = safeProducts.slice(0, 4).map((prod: any) => ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mappedCategories.map((category) => (
+            {categories.map((category) => (
               <Link
                 key={category.name}
-                href={category.href}
+                href={category.slug ? `/category/${category.slug}` : "#"}
                 className="group shadow-xl hover:shadow-2xl duration-500 overflow-hidden bg-white border border-purple-100/50 rounded-3xl hover:border-purple-300 transition-all hover:scale-[1.02] hover:-translate-y-1"
               >
                 <div className="relative overflow-hidden aspect-square">
@@ -278,7 +220,7 @@ const featuredProducts = safeProducts.slice(0, 4).map((prod: any) => ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
+            {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
