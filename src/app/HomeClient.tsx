@@ -134,7 +134,7 @@ export default function HomeClient() {
         {/* <div className="absolute inset-0 bg-gradient-to-b from-purple-900/80 via-purple-800/70 to-pink-900/90" /> */}
 
         {/* Animated Background Pattern */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+        {/* <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div> */}
 
         {/* Content */}
         <div className="relative z-10 text-center px-6 max-w-5xl animate-fadeIn">

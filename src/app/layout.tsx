@@ -19,7 +19,7 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JewTone Online - Premium Jewelry Store",
+  title: "Betterzojewels Online - Premium Jewelry Store",
   description: "Discover our exclusive collection of premium jewelry. Shop for rings, necklaces, earrings, and more with secure payment options.",
 };
 
