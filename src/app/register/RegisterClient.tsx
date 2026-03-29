@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterClient() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     last_name: '',
@@ -19,6 +21,9 @@ export default function RegisterClient() {
     confirmPassword: ''
   });
 
+  const [step, setStep] = useState<'register' | 'otp'>('register');
+const [otp, setOtp] = useState('');
+const [userEmail, setUserEmail] = useState('');
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
 
@@ -41,8 +46,8 @@ export default function RegisterClient() {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Minimum 6 characters required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Minimum 8 characters required";
     }
 
     if (!formData.confirmPassword) {
@@ -75,16 +80,12 @@ export default function RegisterClient() {
         password_confirmation: formData.confirmPassword
       });
 
-      if (res.data?.success) {
-        toast.success(res.data.message || "Registration successful 🎉");
+     if (res.data?.success) {
+  toast.success(res.data.message || "OTP sent to your email");
 
-        setFormData({
-          name: '',
-          last_name: '',
-          email: '',
-          password: '',
-          confirmPassword: ''
-        });
+  setUserEmail(formData.email);
+  setStep('otp'); // 🔥 switch to OTP screen
+
 
       } else {
         toast.error(res.data?.message || "Registration failed");
@@ -115,6 +116,43 @@ export default function RegisterClient() {
     }
   };
 
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!otp) {
+    toast.error("Please enter OTP");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    console.log("Verifying OTP for:", formData.email, "OTP:", otp); // 🔥 debug log
+    const res = await api.post('/verify-email-otp', {
+      email: formData.email, // 🔥 use formData.email instead of userEmail to ensure correct email is sent
+      otp: otp
+    });
+
+    if (res.data?.success) {
+      toast.success("Account verified successfully 🎉");
+
+      // redirect ya login
+      // window.location.href = "/login";
+      router.push('/login');
+    } else {
+      toast.error(res.data?.error || "Invalid OTP");
+    }
+
+  } catch (error: any) {
+    toast.error(
+      error.response?.data?.message || "OTP verification failed"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -142,7 +180,8 @@ export default function RegisterClient() {
             </CardHeader>
 
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+             { step === 'register' ? (
+                <form onSubmit={handleSubmit} className="space-y-4">
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -192,6 +231,37 @@ export default function RegisterClient() {
                 </Button>
 
               </form>
+              ) : (
+                 <form onSubmit={handleVerifyOtp} className="space-y-4">
+
+    <div>
+      <Label>Enter OTP</Label>
+      <Input
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        placeholder="Enter 6 digit OTP"
+      />
+    </div>
+
+    <Button type="submit" disabled={loading} className="w-full">
+      {loading ? "Verifying..." : "Verify OTP"}
+    </Button>
+
+    <p className="text-sm text-center">
+      Didn't receive OTP?{" "}
+      <span
+        className="text-purple-600 cursor-pointer"
+        onClick={async () => {
+          await api.post('/resend-otp', { email: userEmail });
+          toast.success("OTP resent");
+        }}
+      >
+        Resend
+      </span>
+    </p>
+
+  </form>
+              )}
             </CardContent>
 
           </Card>

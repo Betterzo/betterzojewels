@@ -307,7 +307,7 @@ const CheckoutPage = () => {
                 <CardContent className="space-y-4">
                   <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                     {/* Cash on Delivery */}
-                    <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    {/* <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
                       <RadioGroupItem value="cod" id="cod" />
                       <div className="flex items-center space-x-3 flex-1">
                         <DollarSign className="h-5 w-5 text-green-600" />
@@ -318,7 +318,7 @@ const CheckoutPage = () => {
                           <p className="text-sm text-gray-500">Pay when you receive your order</p>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Online Payment */}
                     <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">

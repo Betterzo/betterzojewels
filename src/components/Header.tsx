@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, User, ShoppingBag, Menu, X, LogOut, Sparkles, Filter } from 'lucide-react';
+import { Search, User, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
@@ -89,6 +89,15 @@ const Header = () => {
                   className="w-80 pl-12 pr-4 py-3 bg-white/95 backdrop-blur-sm border border-purple-200/50 rounded-full focus:border-purple-500 focus:ring-2 focus:ring-purple-200/50 transition-all shadow-md hover:shadow-lg"
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400 h-5 w-5 group-focus-within:text-purple-600 transition-colors" />
+                {searchQuery.trim() && (
+                  <button
+                    type="submit"
+                    className="absolute right-10 top-1/2 -translate-y-1/2 text-purple-500 hover:text-purple-700 transition-colors"
+                    aria-label="Search products"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                )}
                 {searchQuery && (
                   <button
                     type="button"
@@ -185,7 +194,13 @@ const Header = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-white border border-[#EADFD8] focus:border-[#B76E79] focus:ring-0"
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B6F65] h-4 w-4" />
+                <button
+                  type="submit"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B6F65] hover:text-[#B76E79] transition-colors"
+                  aria-label="Search products"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
               </div>
             </form>
 

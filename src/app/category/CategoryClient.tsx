@@ -5,18 +5,10 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CartProvider } from '@/contexts/CartContext';
-import { Search, Filter, X, SlidersHorizontal, Sparkles } from 'lucide-react';
-
-function formatCategoryName(name: string) {
-  return name
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
+import { Search, X, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 interface Category {
   id: number;
@@ -32,11 +24,21 @@ interface CategoryClientProps {
 }
 
 export default function CategoryClient({ category, products }: CategoryClientProps) {
+  const PRODUCTS_PER_PAGE = 12;
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState<number[]>([0, 100000]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PRODUCTS_PER_PAGE);
+
+  const maxPrice = useMemo(() => {
+    const parsedPrices = products
+      .map((p) => Number.parseFloat(p.price))
+      .filter((price) => Number.isFinite(price) && price >= 0);
+
+    return parsedPrices.length ? Math.max(...parsedPrices) : 100000;
+  }, [products]);
 
   // Get unique materials from products
   const materials = useMemo(() => {
@@ -92,15 +94,19 @@ export default function CategoryClient({ category, products }: CategoryClientPro
   }, [products, searchQuery, priceRange, selectedMaterials, sortBy]);
 
   useEffect(() => {
-  if (products.length) {
-    const max = Math.max(...products.map(p => parseFloat(p.price)));
-    setPriceRange([0, max]);
-  }
-}, [products]);
+    setPriceRange([0, maxPrice]);
+  }, [maxPrice]);
 
-  const maxPrice = useMemo(() => {
-    return Math.max(...products.map(p => parseFloat(p.price)), 100000);
-  }, [products]);
+  useEffect(() => {
+    setVisibleCount(PRODUCTS_PER_PAGE);
+  }, [searchQuery, priceRange, selectedMaterials, sortBy]);
+
+  const visibleProducts = useMemo(
+    () => filteredProducts.slice(0, visibleCount),
+    [filteredProducts, visibleCount]
+  );
+
+  const hasMoreProducts = visibleProducts.length < filteredProducts.length;
 
 
   const handleMaterialToggle = (material: string) => {
@@ -156,7 +162,7 @@ export default function CategoryClient({ category, products }: CategoryClientPro
       </section>
 
       {/* Modern Filter & Search Bar */}
-      <section className="sticky top-24 z-40 bg-white/95 backdrop-blur-xl border-b border-purple-100/50 shadow-lg">
+      <section className="relative lg:sticky lg:top-24 z-40 bg-white/95 backdrop-blur-xl border-b border-purple-100/50 shadow-lg">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* Search */}
@@ -225,54 +231,54 @@ export default function CategoryClient({ category, products }: CategoryClientPro
           </div>
 
           {/* Advanced Filters Panel */}
-          {/* Advanced Filters Panel */}
-{showFilters && (
-  <div className="mt-6 p-4 sm:p-6 bg-white rounded-2xl border-2 border-purple-100 shadow-lg animate-fadeIn">
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-      
-      {/* Price Range */}
-      <div className="flex flex-col">
-        <label className="text-sm font-semibold text-slate-700 mb-2">
-          Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
-        </label>
-        <Slider
-          value={priceRange}
-          onValueChange={setPriceRange}
-          min={0}
-          max={maxPrice}
-          step={100}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-slate-500 mt-1">
-          <span>$0</span>
-          <span>${maxPrice.toLocaleString()}</span>
-        </div>
-      </div>
+          {showFilters && (
+            <div className="mt-6 p-4 sm:p-6 bg-white rounded-2xl border-2 border-purple-100 shadow-lg animate-fadeIn">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                {/* Price Range */}
+                <div className="rounded-xl border border-purple-100 p-4 bg-purple-50/30">
+                  <label className="text-sm font-semibold text-slate-700 mb-3 block">
+                    Price Range
+                  </label>
+                  <p className="text-sm text-slate-600 mb-3">
+                    ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+                  </p>
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    min={0}
+                    max={maxPrice}
+                    step={100}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-2">
+                    <span>$0</span>
+                    <span>${maxPrice.toLocaleString()}</span>
+                  </div>
+                </div>
 
-      {/* Materials */}
-      {materials.length > 0 && (
-        <div className="flex flex-col max-h-40 overflow-y-auto">
-          <label className="text-sm font-semibold text-slate-700 mb-2">Material</label>
-          <div className="flex flex-col space-y-2">
-            {materials.map(material => (
-              <div key={material} className="flex items-center space-x-2">
-                <Checkbox
-                  id={material}
-                  checked={selectedMaterials.includes(material)}
-                  onCheckedChange={() => handleMaterialToggle(material)}
-                />
-                <label htmlFor={material} className="text-sm text-slate-700 cursor-pointer hover:text-purple-600">
-                  {material}
-                </label>
+                {/* Materials */}
+                {materials.length > 0 && (
+                  <div className="rounded-xl border border-purple-100 p-4 bg-purple-50/30">
+                    <label className="text-sm font-semibold text-slate-700 mb-3 block">Material</label>
+                    <div className="max-h-40 overflow-y-auto pr-1 space-y-2">
+                      {materials.map(material => (
+                        <div key={material} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={material}
+                            checked={selectedMaterials.includes(material)}
+                            onCheckedChange={() => handleMaterialToggle(material)}
+                          />
+                          <label htmlFor={material} className="text-sm text-slate-700 cursor-pointer hover:text-purple-600">
+                            {material}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-    </div>
-  </div>
-)}
+            </div>
+          )}
         </div>
       </section>
 
@@ -282,7 +288,7 @@ export default function CategoryClient({ category, products }: CategoryClientPro
           {filteredProducts.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
+                {visibleProducts.map((product) => (
                   <ProductCard 
                     key={product.id} 
                     product={{
@@ -291,16 +297,17 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                       name: product.name,
                       price: parseFloat(product.price),
                       featured_image: product.featured_image || product.images?.[0]?.image_url,
-                      category: product.category?.name || category.name,
+                      category: { name: product.category?.name || category.name },
                       quantity: 1,
                       description: product.description
                     }} 
                   />
                 ))}
               </div>
-              {filteredProducts.length >= 12 && (
+              {hasMoreProducts && (
                 <div className="text-center mt-12">
                   <Button 
+                    onClick={() => setVisibleCount((prev) => prev + PRODUCTS_PER_PAGE)}
                     size="lg" 
                     className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all"
                   >

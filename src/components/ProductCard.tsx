@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext';
 import { ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface Product {
   id: number;
@@ -21,13 +22,15 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addToCart, isLoading } = useCart();
+  const { addToCart } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     try {
+      setIsAdding(true);
       await addToCart({
         product_id: product.id,
         name: product.name,
@@ -38,6 +41,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
       toast.success(`${product.name} added to cart!`);
     } catch (error) {
       toast.error('Failed to add item to cart. Please try again.');
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -85,10 +90,10 @@ return (
           onClick={handleAddToCart}
           size="sm"
           className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-semibold"
-          disabled={isLoading}
+          disabled={isAdding}
         >
           <ShoppingBag className="h-4 w-4 mr-1.5" />
-          {isLoading ? "Adding..." : "Add"}
+          {isAdding ? "Adding..." : "Add"}
         </Button>
       </div>
     </div>

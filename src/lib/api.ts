@@ -12,10 +12,50 @@ export const getCategories = async () => {
   return res.data.data.data; // returns the array of categories
 };
 
-export const getProducts = async () => {
-  const res = await api.get('/products');
-  // console.log("products", res.data.data.data); // log the products data
-  return res.data.data.data; // returns the array of products
+export const getProductsPaginated = async ({
+  search,
+  page = 1,
+}: {
+  search?: string;
+  page?: number;
+} = {}) => {
+  const res = await api.get("/products", {
+    params: {
+      ...(search ? { search } : {}),
+      page,
+    },
+  });
+
+  const payload = res.data?.data;
+
+  if (payload && Array.isArray(payload.data)) {
+    return payload;
+  }
+
+  if (Array.isArray(payload)) {
+    return {
+      current_page: 1,
+      data: payload,
+      last_page: 1,
+      total: payload.length,
+      per_page: payload.length,
+      next_page_url: null,
+    };
+  }
+
+  return {
+    current_page: 1,
+    data: [],
+    last_page: 1,
+    total: 0,
+    per_page: 0,
+    next_page_url: null,
+  };
+};
+
+export const getProducts = async (search?: string) => {
+  const paginated = await getProductsPaginated({ search, page: 1 });
+  return paginated.data || [];
 };
 
 export const getProductById = async (id: string | number) => {
