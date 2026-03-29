@@ -71,7 +71,8 @@ export default function RegisterClient() {
         name: formData.name,
         last_name: formData.last_name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        password_confirmation: formData.confirmPassword
       });
 
       if (res.data?.success) {
