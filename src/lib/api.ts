@@ -2,7 +2,7 @@ import axios from "axios";
 import { connect } from "http2";
 
 const api = axios.create({
-  // baseURL: "https://api.jewtone.com/api/v1",
+  // baseURL: "http://localhost:9000/api/v1",
   baseURL: "https://api.betterzojewels.com/api/v1",
 });
 
