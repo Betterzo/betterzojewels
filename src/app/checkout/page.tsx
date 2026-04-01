@@ -15,7 +15,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { toast } from 'sonner';
 import AddressModule from '@/components/AddressModule';
 import { CreditCard, DollarSign, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { placeOrder } from '@/lib/api';
+import { applyCoupon, placeOrder } from '@/lib/api';
 import { validateCardNumber, validateExpiryDate, validateCVV, validateUPIId } from '@/lib/payment';
 import { 
   initializeRazorpayPayment, 
@@ -53,7 +53,18 @@ const CheckoutPage = () => {
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
   const [couponError, setCouponError] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
+
+  const getCouponApiErrorMessage = (error: any) => {
+    return (
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.response?.data?.data?.message ||
+      error?.message ||
+      'Invalid or expired coupon code.'
+    );
+  };
 
   // Pre-fill form with user data when authenticated
   useEffect(() => {
@@ -119,17 +130,39 @@ const CheckoutPage = () => {
     });
   };
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo: only accept SAVE10 for 10% off
-    if (coupon.trim().toUpperCase() === 'SAVE10') {
-      setDiscount(getTotalPrice() * 0.1);
-      setAppliedCoupon('SAVE10');
-      setCouponError('');
-    } else {
+    const couponCode = coupon.trim();
+    if (!couponCode) {
       setDiscount(0);
       setAppliedCoupon('');
-      setCouponError('Invalid or expired coupon code.');
+      setCouponError('Please enter a coupon code.');
+      return;
+    }
+
+    try {
+      setIsApplyingCoupon(true);
+      setCouponError('');
+
+      const response = await applyCoupon(couponCode, getTotalPrice());
+      const couponData = response?.data;
+      const appliedDiscount = Number.parseFloat(couponData?.discount ?? '0');
+
+      if (!response?.status || !couponData) {
+        throw new Error(response?.message || 'Invalid or expired coupon code.');
+      }
+
+      setDiscount(Number.isFinite(appliedDiscount) ? appliedDiscount : 0);
+      setAppliedCoupon(couponData?.coupon?.code || couponCode.toUpperCase());
+      toast.success(response?.message || 'Coupon applied successfully');
+    } catch (error: any) {
+      setDiscount(0);
+      setAppliedCoupon('');
+      const apiMessage = getCouponApiErrorMessage(error);
+      setCouponError(apiMessage);
+      toast.error(apiMessage);
+    } finally {
+      setIsApplyingCoupon(false);
     }
   };
 
@@ -521,7 +554,9 @@ const CheckoutPage = () => {
                       placeholder="Coupon code"
                       className="border rounded px-3 py-2 flex-1"
                     />
-                    <Button type="submit" size="sm">Apply</Button>
+                    <Button type="submit" size="sm" disabled={isApplyingCoupon}>
+                      {isApplyingCoupon ? 'Applying...' : 'Apply'}
+                    </Button>
                   </form>
                   {appliedCoupon && (
                     <div className="text-green-600 text-sm mb-2">Coupon <b>{appliedCoupon}</b> applied! -${discount.toFixed(2)}</div>
@@ -550,7 +585,7 @@ const CheckoutPage = () => {
                   </div>
 
                   {/* Test Razorpay Button (for debugging) */}
-                  {(paymentMethod === 'online' || paymentMethod === 'upi') && (
+                  {/* {(paymentMethod === 'online' || paymentMethod === 'upi') && (
                     <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <p className="text-sm text-yellow-800 mb-2">Debug: Test Razorpay Integration</p>
                       <Button 
@@ -562,7 +597,7 @@ const CheckoutPage = () => {
                         Test Razorpay (₹1)
                       </Button>
                     </div>
-                  )}
+                  )} */}
 
                   {/* Order Items */}
                   <div className="space-y-3">

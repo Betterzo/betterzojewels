@@ -251,6 +251,24 @@ export const placeOrder = async (orderData: {
   return res.data;
 };
 
+export const applyCoupon = async (couponCode: string, amount: number) => {
+  const token = localStorage.getItem('auth_token');
+  const res = await api.post(
+    '/apply-coupon',
+    {
+      code: couponCode,
+      order_amount: amount,
+    },
+    {
+      headers: {
+         Authorization: `Bearer ${token}` ,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return res.data;
+};
+
 // Orders API function
 export const getOrders = async () => {
   const token = localStorage.getItem('auth_token');
