@@ -234,6 +234,9 @@ export const placeOrder = async (orderData: {
     country: string;
   };
   payment_method: string;
+  coupon_code?: string;
+  discount?: number;
+  order_amount?: number;
 }): Promise<{
   status: boolean;
   message: string;

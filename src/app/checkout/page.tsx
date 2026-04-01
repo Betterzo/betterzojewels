@@ -52,6 +52,7 @@ const CheckoutPage = () => {
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
+  const [couponFinalAmount, setCouponFinalAmount] = useState<number | null>(null);
   const [couponError, setCouponError] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
@@ -136,6 +137,7 @@ const CheckoutPage = () => {
     if (!couponCode) {
       setDiscount(0);
       setAppliedCoupon('');
+      setCouponFinalAmount(null);
       setCouponError('Please enter a coupon code.');
       return;
     }
@@ -147,17 +149,20 @@ const CheckoutPage = () => {
       const response = await applyCoupon(couponCode, getTotalPrice());
       const couponData = response?.data;
       const appliedDiscount = Number.parseFloat(couponData?.discount ?? '0');
+      const apiFinalAmount = Number.parseFloat(couponData?.final_amount ?? '0');
 
       if (!response?.status || !couponData) {
         throw new Error(response?.message || 'Invalid or expired coupon code.');
       }
 
       setDiscount(Number.isFinite(appliedDiscount) ? appliedDiscount : 0);
+      setCouponFinalAmount(Number.isFinite(apiFinalAmount) ? apiFinalAmount : null);
       setAppliedCoupon(couponData?.coupon?.code || couponCode.toUpperCase());
       toast.success(response?.message || 'Coupon applied successfully');
     } catch (error: any) {
       setDiscount(0);
       setAppliedCoupon('');
+      setCouponFinalAmount(null);
       const apiMessage = getCouponApiErrorMessage(error);
       setCouponError(apiMessage);
       toast.error(apiMessage);
@@ -200,6 +205,7 @@ const CheckoutPage = () => {
           shipping_address_id: selectedAddress.id.toString(),
           payment_method: paymentMethod
         };
+        
 
         // Call the checkout API to place order first
         const orderResponse = await placeOrder(orderData);
@@ -295,6 +301,11 @@ const CheckoutPage = () => {
   const subtotal = getTotalPrice();
   const tax = (subtotal - discount) * 0.03;
   const total = subtotal - discount + tax;
+  const payableAmount = Math.max(
+    0,
+    Number((couponFinalAmount ?? total).toFixed(2))
+  );
+  const discountAmount = Math.max(0, Number(discount.toFixed(2)));
 
   return (
     <ProtectedRoute redirectTo="/login">
@@ -637,7 +648,7 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex justify-between text-lg font-semibold border-t pt-2">
                       <span>Total</span>
-                      <span className="text-emerald-800">${total.toLocaleString()}</span>
+                      <span className="text-emerald-800">${payableAmount.toLocaleString()}</span>
                     </div>
                   </div>
                   <form onSubmit={handleSubmit}>
