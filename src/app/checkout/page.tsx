@@ -203,7 +203,11 @@ const CheckoutPage = () => {
         // Prepare order data according to API structure
         const orderData = {
           shipping_address_id: selectedAddress.id.toString(),
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          coupon_code: appliedCoupon || undefined,
+          discount: discountAmount,
+          order_amount: payableAmount,
+          final_amount: payableAmount
         };
         
 
@@ -264,7 +268,11 @@ const CheckoutPage = () => {
       // For COD orders, proceed normally
       const orderData = {
         shipping_address_id: selectedAddress.id.toString(),
-        payment_method: paymentMethod
+        payment_method: paymentMethod,
+        coupon_code: appliedCoupon || undefined,
+        discount: discountAmount,
+        order_amount: payableAmount,
+        final_amount: payableAmount
       };
 
       // Call the checkout API
