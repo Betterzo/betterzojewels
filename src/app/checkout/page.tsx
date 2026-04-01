@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { toast } from 'sonner';
 import AddressModule from '@/components/AddressModule';
-import { CreditCard, DollarSign, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { CreditCard, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { applyCoupon, placeOrder } from '@/lib/api';
 import { validateCardNumber, validateExpiryDate, validateCVV, validateUPIId } from '@/lib/payment';
 import { 
@@ -30,9 +30,9 @@ import { debugRazorpayOrderIds } from '@/lib/razorpay-debug';
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, getTotalPrice } = useCart();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [paymentMethod, setPaymentMethod] = useState('online');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -52,7 +52,6 @@ const CheckoutPage = () => {
   const [coupon, setCoupon] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
-  const [couponFinalAmount, setCouponFinalAmount] = useState<number | null>(null);
   const [couponError, setCouponError] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
@@ -137,7 +136,6 @@ const CheckoutPage = () => {
     if (!couponCode) {
       setDiscount(0);
       setAppliedCoupon('');
-      setCouponFinalAmount(null);
       setCouponError('Please enter a coupon code.');
       return;
     }
@@ -149,20 +147,17 @@ const CheckoutPage = () => {
       const response = await applyCoupon(couponCode, getTotalPrice());
       const couponData = response?.data;
       const appliedDiscount = Number.parseFloat(couponData?.discount ?? '0');
-      const apiFinalAmount = Number.parseFloat(couponData?.final_amount ?? '0');
 
       if (!response?.status || !couponData) {
         throw new Error(response?.message || 'Invalid or expired coupon code.');
       }
 
       setDiscount(Number.isFinite(appliedDiscount) ? appliedDiscount : 0);
-      setCouponFinalAmount(Number.isFinite(apiFinalAmount) ? apiFinalAmount : null);
       setAppliedCoupon(couponData?.coupon?.code || couponCode.toUpperCase());
       toast.success(response?.message || 'Coupon applied successfully');
     } catch (error: any) {
       setDiscount(0);
       setAppliedCoupon('');
-      setCouponFinalAmount(null);
       const apiMessage = getCouponApiErrorMessage(error);
       setCouponError(apiMessage);
       toast.error(apiMessage);
@@ -180,13 +175,10 @@ const CheckoutPage = () => {
       return;
     }
 
-    // For online and UPI payments, we only need basic validation
-    // Razorpay will handle the actual payment details
-    if (paymentMethod === 'online' || paymentMethod === 'upi') {
-      if (!formData.nameOnCard && !formData.firstName) {
-        toast.error('Please enter your name for payment');
-        return;
-      }
+    // Razorpay needs payer name details.
+    if (!formData.nameOnCard && !formData.firstName) {
+      toast.error('Please enter your name for payment');
+      return;
     }
 
     // Validate cart has items
@@ -198,94 +190,56 @@ const CheckoutPage = () => {
     setIsSubmitting(true);
 
     try {
-      // For online and UPI payments, place order first to get order_id
-      if (paymentMethod === 'online' || paymentMethod === 'upi') {
-        // Prepare order data according to API structure
-        const orderData = {
-          shipping_address_id: selectedAddress.id.toString(),
-          payment_method: paymentMethod,
-          coupon_code: appliedCoupon || undefined,
-          discount: discountAmount,
-          order_amount: payableAmount,
-          final_amount: payableAmount
-        };
-        
-
-        // Call the checkout API to place order first
-        const orderResponse = await placeOrder(orderData);
-        
-        // Check if order was placed successfully
-        if (!orderResponse.status) {
-          toast.error(orderResponse.message || 'Failed to place order');
-          return;
-        }
-
-        // Order placed successfully, now initialize Razorpay payment
-        const razorpayOrderData: RazorpayOrderResponse = {
-          status: orderResponse.status,
-          message: orderResponse.message,
-          order_id: orderResponse.order_id,
-          amount: orderResponse.amount,
-          rzpay_order_id: orderResponse.rzpay_order_id
-        };
-
-        // Customer details for Razorpay
-        const customerDetails = {
-          name: formData.nameOnCard || `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: selectedAddress.phone,
-          address: `${selectedAddress.address_line_1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}`
-        };
-
-        // Test Razorpay configuration first
-        // testRazorpayConfiguration();
-
-        // Initialize Razorpay payment
-        try {
-          console.log('About to initialize Razorpay payment...');
-          console.log('Order data being sent to Razorpay:', razorpayOrderData);
-          
-          await initializeRazorpayPayment(
-            razorpayOrderData,
-            customerDetails,
-            (response) => {
-              // Debug order IDs
-              debugRazorpayOrderIds(razorpayOrderData, response);
-              handlePaymentSuccess(response, razorpayOrderData);
-            },
-            handlePaymentFailure,
-            handlePaymentDismiss
-          );
-          console.log('Razorpay initialization completed');
-        } catch (error) {
-          console.error('Error initializing Razorpay:', error);
-          toast.error('Failed to initialize payment. Please try again.');
-        }
-
-        return; // Don't proceed further as Razorpay will handle the flow
-      }
-
-      // For COD orders, proceed normally
       const orderData = {
         shipping_address_id: selectedAddress.id.toString(),
         payment_method: paymentMethod,
-        coupon_code: appliedCoupon || undefined,
-        discount: discountAmount,
-        order_amount: payableAmount,
-        final_amount: payableAmount
+        coupon_code: appliedCoupon || undefined
       };
 
-      // Call the checkout API
-      const response = await placeOrder(orderData);
-      
-      // Show success message for COD
-      toast.success('Order placed successfully! You will pay on delivery.');
-      
-      // Clear the cart after successful order
-      // await clearCart();
-      
-      // Redirect to dashboard for COD orders
-      router.push('/dashboard');
+      const orderResponse = await placeOrder(orderData);
+      if (!orderResponse.status) {
+        toast.error(orderResponse.message || 'Failed to place order');
+        return;
+      }
+
+      const backendAmount = Number(orderResponse.amount || 0);
+      if (Math.abs(backendAmount - payableAmount) > 0.01) {
+        toast.error(
+          `Amount mismatch detected. Expected ${payableAmount.toFixed(2)} but got ${backendAmount.toFixed(2)}.`
+        );
+        return;
+      }
+
+      const razorpayOrderData: RazorpayOrderResponse = {
+        status: orderResponse.status,
+        message: orderResponse.message,
+        order_id: orderResponse.order_id,
+        amount: orderResponse.amount,
+        rzpay_order_id: orderResponse.rzpay_order_id
+      };
+
+      const customerDetails = {
+        name: formData.nameOnCard || `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: selectedAddress.phone,
+        address: `${selectedAddress.address_line_1}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}`
+      };
+
+      try {
+        await initializeRazorpayPayment(
+          razorpayOrderData,
+          customerDetails,
+          (response) => {
+            debugRazorpayOrderIds(razorpayOrderData, response);
+            handlePaymentSuccess(response, razorpayOrderData);
+          },
+          handlePaymentFailure,
+          handlePaymentDismiss
+        );
+      } catch (error) {
+        console.error('Error initializing Razorpay:', error);
+        toast.error('Failed to initialize payment. Please try again.');
+      }
       
     } catch (error: any) {
       console.error('Order placement error:', error);
@@ -307,13 +261,10 @@ const CheckoutPage = () => {
   };
 
   const subtotal = getTotalPrice();
-  const tax = (subtotal - discount) * 0.03;
-  const total = subtotal - discount + tax;
-  const payableAmount = Math.max(
-    0,
-    Number((couponFinalAmount ?? total).toFixed(2))
-  );
-  const discountAmount = Math.max(0, Number(discount.toFixed(2)));
+  const taxableAmount = Math.max(0, subtotal - discount);
+  const tax = taxableAmount * 0.03;
+  const total = taxableAmount + tax;
+  const payableAmount = Math.max(0, Number(total.toFixed(2)));
 
   return (
     <ProtectedRoute redirectTo="/login">
@@ -524,37 +475,6 @@ const CheckoutPage = () => {
                 </Card>
               )}
 
-              {/* COD Information */}
-              {paymentMethod === 'cod' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                      <span>Cash on Delivery</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0">
-                          <DollarSign className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-green-800">Pay on Delivery</h4>
-                          <p className="text-sm text-green-700 mt-1">
-                            You can pay with cash when your order is delivered. No advance payment required.
-                          </p>
-                          <ul className="text-sm text-green-700 mt-2 space-y-1">
-                            <li>• Pay with cash, card, or UPI at delivery</li>
-                            <li>• No additional charges</li>
-                            <li>• Secure and convenient</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
 
             {/* Order Summary */}
@@ -587,9 +507,7 @@ const CheckoutPage = () => {
                   {/* Payment Method Display */}
                   <div className="bg-gray-50 rounded-lg p-3">
                     <div className="flex items-center space-x-2">
-                      {paymentMethod === 'cod' ? (
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                      ) : paymentMethod === 'upi' ? (
+                      {paymentMethod === 'upi' ? (
                         <div className="h-4 w-4 bg-purple-600 rounded flex items-center justify-center">
                           <span className="text-white text-xs font-bold">UPI</span>
                         </div>
@@ -597,8 +515,7 @@ const CheckoutPage = () => {
                         <CreditCard className="h-4 w-4 text-blue-600" />
                       )}
                       <span className="text-sm font-medium">
-                        {paymentMethod === 'cod' ? 'Cash on Delivery' : 
-                         paymentMethod === 'upi' ? 'UPI Payment' : 'Online Payment'}
+                        {paymentMethod === 'upi' ? 'UPI Payment' : 'Online Payment'}
                       </span>
                     </div>
                   </div>
@@ -672,7 +589,6 @@ const CheckoutPage = () => {
                           Placing Order...
                         </>
                       ) : (
-                        paymentMethod === 'cod' ? 'Place Order (Pay on Delivery)' : 
                         paymentMethod === 'upi' ? 'Complete UPI Payment' : 'Complete Online Payment'
                       )}
                     </Button>

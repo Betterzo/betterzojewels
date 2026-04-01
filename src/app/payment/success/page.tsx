@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,6 +11,7 @@ import { verifyPaymentSignature } from '@/lib/razorpay';
 import { verifyPaymentAndUpdateOrder, getPaymentStatus } from '@/lib/api';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCart } from '@/contexts/CartContext';
 
 const PaymentSuccessContent = () => {
   const router = useRouter();
@@ -18,42 +19,71 @@ const PaymentSuccessContent = () => {
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'success' | 'failed'>('pending');
+  const { clearCart } = useCart();
 
   const transactionId = searchParams.get('transactionId');
   const paymentId = searchParams.get('paymentId');
   const orderId = searchParams.get('orderId'); // This is Razorpay's order ID
   const backendOrderId = searchParams.get('backendOrderId'); // This is your backend order ID
   const signature = searchParams.get('signature');
+  const serverVerifiedInRedirect = searchParams.get('serverVerified') === '1';
+  const amountParam = searchParams.get('amount');
+  const paymentMethodParam = searchParams.get('paymentMethod') || 'Online Payment';
+  const verificationKey = `${transactionId || ''}|${paymentId || ''}|${orderId || ''}|${backendOrderId || ''}|${signature || ''}|${serverVerifiedInRedirect ? '1' : '0'}|${amountParam || ''}|${paymentMethodParam}`;
+  const processedVerificationRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (processedVerificationRef.current === verificationKey) {
+      return;
+    }
+    processedVerificationRef.current = verificationKey;
+
     const verifyPaymentStatus = async () => {
       // For Razorpay payments, we have paymentId (required), orderId and signature (optional)
       if (paymentId) {
         try {
-          // First, verify with server
-          const paymentData = {
-            razorpay_payment_id: paymentId,
-            razorpay_order_id: orderId || undefined,
-            razorpay_signature: signature || undefined,
-            order_id: backendOrderId || orderId || '', // Use backend order ID if available
-            amount: parseInt(searchParams.get('amount') || '0')
-          };
-
-          console.log('Verifying payment with server...');
-          const serverResponse = await verifyPaymentAndUpdateOrder(paymentData);
-          console.log('Server verification response:', serverResponse);
-
-          if (serverResponse.status) {
+          if (serverVerifiedInRedirect) {
             setVerificationStatus('success');
             setPaymentDetails({
               transactionId: paymentId,
               paymentId,
               orderId,
               backendOrderId,
-              amount: searchParams.get('amount'),
-              paymentMethod: searchParams.get('paymentMethod') || 'Online Payment',
+              amount: amountParam,
+              paymentMethod: paymentMethodParam,
               serverVerified: true
             });
+            clearCart().catch(() => {});
+            setIsLoading(false);
+            return;
+          }
+
+          // First, verify with server
+          const paymentData = {
+            razorpay_payment_id: paymentId,
+            razorpay_order_id: orderId || undefined,
+            razorpay_signature: signature || undefined,
+            order_id: backendOrderId || orderId || '', // Use backend order ID if available
+            amount: parseInt(amountParam || '0')
+          };
+
+          console.log('Verifying payment with server...');
+          const serverResponse = await verifyPaymentAndUpdateOrder(paymentData);
+          console.log('Server verification response:', serverResponse);
+
+          if (serverResponse?.status || serverResponse?.success) {
+            setVerificationStatus('success');
+            setPaymentDetails({
+              transactionId: paymentId,
+              paymentId,
+              orderId,
+              backendOrderId,
+              amount: amountParam,
+              paymentMethod: paymentMethodParam,
+              serverVerified: true
+            });
+            // Keep UI cart state in sync immediately after success.
+            clearCart().catch(() => {});
           } else {
             // Fallback to client-side verification
             const isValid = orderId && signature ? verifyPaymentSignature(orderId, paymentId, signature) : false;
@@ -64,8 +94,8 @@ const PaymentSuccessContent = () => {
               paymentId,
               orderId,
               backendOrderId,
-              amount: searchParams.get('amount'),
-              paymentMethod: searchParams.get('paymentMethod') || 'Online Payment',
+              amount: amountParam,
+              paymentMethod: paymentMethodParam,
               serverVerified: false
             });
             } else {
@@ -83,8 +113,8 @@ const PaymentSuccessContent = () => {
               paymentId,
               orderId,
               backendOrderId,
-              amount: searchParams.get('amount'),
-              paymentMethod: searchParams.get('paymentMethod') || 'Online Payment',
+              amount: amountParam,
+              paymentMethod: paymentMethodParam,
               serverVerified: false
             });
           } else {
@@ -100,8 +130,8 @@ const PaymentSuccessContent = () => {
             setPaymentDetails({
               transactionId: response.transactionId,
               paymentId,
-              amount: searchParams.get('amount'),
-              paymentMethod: searchParams.get('paymentMethod') || 'Online Payment'
+              amount: amountParam,
+              paymentMethod: paymentMethodParam
             });
           } else {
             setVerificationStatus('failed');
@@ -114,7 +144,7 @@ const PaymentSuccessContent = () => {
     };
 
     verifyPaymentStatus();
-  }, [transactionId, paymentId, orderId, signature, searchParams]);
+  }, [transactionId, paymentId, orderId, signature, clearCart, serverVerifiedInRedirect, backendOrderId, amountParam, paymentMethodParam, verificationKey]);
 
   const handleContinueShopping = () => {
     router.push('/');

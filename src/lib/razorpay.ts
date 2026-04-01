@@ -172,6 +172,7 @@ export const handlePaymentSuccess = async (response: RazorpayResponse, orderData
   console.log('Razorpay Order ID:', response.razorpay_order_id);
   console.log('Razorpay Payment ID:', response.razorpay_payment_id);
   
+  let serverVerified = false;
   try {
     // If we have order data, update the server immediately
     if (orderData) {
@@ -190,6 +191,7 @@ export const handlePaymentSuccess = async (response: RazorpayResponse, orderData
       console.log('Payment data being sent to server:', paymentData);
       const serverResponse = await verifyPaymentAndUpdateOrder(paymentData);
       console.log('Server update response:', serverResponse);
+      serverVerified = !!(serverResponse?.status || serverResponse?.success);
     }
   } catch (error) {
     console.error('Failed to update server:', error);
@@ -197,7 +199,7 @@ export const handlePaymentSuccess = async (response: RazorpayResponse, orderData
   }
   
   // Redirect to success page with payment details
-  const successUrl = `/payment/success?paymentId=${response.razorpay_payment_id}&orderId=${response.razorpay_order_id}&signature=${response.razorpay_signature}&backendOrderId=${orderData?.order_id || ''}&amount=${orderData?.amount || 0}`;
+  const successUrl = `/payment/success?paymentId=${response.razorpay_payment_id}&orderId=${response.razorpay_order_id}&signature=${response.razorpay_signature}&backendOrderId=${orderData?.order_id || ''}&amount=${orderData?.amount || 0}&serverVerified=${serverVerified ? '1' : '0'}`;
   window.location.href = successUrl;
 };
 
