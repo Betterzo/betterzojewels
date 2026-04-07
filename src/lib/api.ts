@@ -6,6 +6,104 @@ const api = axios.create({
   baseURL: "https://api.betterzojewels.com/api/v1",
 });
 
+export interface ApiBlogPost {
+  id: number;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  content?: string;
+  body?: string;
+  image?: string;
+  cover_image?: string;
+  featured_image?: string;
+  author?: string;
+  author_name?: string;
+  thumbnail_image?: string;
+  category?: string | { name?: string };
+  tags?: string[] | string;
+  published_at?: string;
+  created_at?: string;
+  read_time?: string;
+}
+
+export interface ApiBlogsPaginated {
+  current_page: number;
+  data: ApiBlogPost[];
+  last_page: number;
+  total: number;
+  per_page: number;
+  next_page_url: string | null;
+}
+
+export const getBlogsPaginated = async ({
+  search,
+  page = 1,
+}: {
+  search?: string;
+  page?: number;
+} = {}): Promise<ApiBlogsPaginated> => {
+  const tryEndpoints = ["/blogs", "/blog"];
+
+  for (const endpoint of tryEndpoints) {
+    try {
+      const res = await api.get(endpoint, {
+        params: {
+          ...(search ? { title: search } : {}),
+          page,
+        },
+      });
+
+      const payload = res.data?.data;
+      if (payload && Array.isArray(payload.data)) {
+        return payload;
+      }
+
+      if (Array.isArray(payload)) {
+        return {
+          current_page: 1,
+          data: payload,
+          last_page: 1,
+          total: payload.length,
+          per_page: payload.length,
+          next_page_url: null,
+        };
+      }
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  return {
+    current_page: 1,
+    data: [],
+    last_page: 1,
+    total: 0,
+    per_page: 0,
+    next_page_url: null,
+  };
+};
+
+export const getBlogBySlug = async (slug: string): Promise<ApiBlogPost | null> => {
+  const tryEndpoints = [`/blogs/${slug}`, `/blog/${slug}`];
+
+  for (const endpoint of tryEndpoints) {
+    try {
+      const res = await api.get(endpoint);
+      return res.data?.data || null;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  return null;
+};
+
 export const getCategories = async () => {
   const res = await api.get('/categories');
   // console.log("categories", res.data.data.data); // log the categories data
@@ -99,7 +197,7 @@ function formatCategoryName(slug: string): string {
 
 export const getCategoryBySlug = async (slug: string) => {
   try {
-    const res = await api.get(`/category/${slug}`);
+    const res = await api.get(`/categories/${slug}`);
     return res.data.data;
   } catch (error: any) {
     if (error.response && error.response.status === 404) {

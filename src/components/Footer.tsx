@@ -36,7 +36,7 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="space-y-3">
-              {["rings", "necklaces", "earrings", "bracelets"].map((item) => (
+              {["rings", "necklaces",  "bracelets"].map((item) => (
                 <li key={item}>
                   <Link
                     href={`/category/${item}`}
@@ -46,6 +46,12 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              <Link
+                    href={`/blog`}
+                    className="text-slate-300 hover:text-pink-400 transition-colors hover:translate-x-1 inline-block"
+                  >
+                    Blog
+                  </Link>
             </ul>
           </div>
 
