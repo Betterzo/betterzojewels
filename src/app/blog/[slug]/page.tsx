@@ -72,7 +72,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     notFound();
   }
 
-  const coverImage = post.featured_image || post.cover_image || post.image || "/dummy.jpg";
+  const coverImage = post.featured_image || post.cover_image || post.image|| post.thumbnail_image || "/dummy.jpg";
   const category =
     typeof post.category === "string" ? post.category : post.category?.name || "Blog";
   const author = post.author || post.author_name || "BetterZoJewels Editorial";
