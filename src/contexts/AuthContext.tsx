@@ -113,13 +113,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('auth_token');
   };
 
-  const updateUser = (userData: Partial<any>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-    }
+  // console.log('Update user function:', user.user);
+ const updateUser = (userData: Partial<any>) => {
+  if (!user) return;
+
+  const updatedUser = {
+    ...user,
+
+    // ✅ top-level name update
+    name: userData.name ?? user.name,
+
+    // ✅ nested user.name update
+    user: {
+      ...user.user,
+      name: userData.name ?? user.user.name,
+    },
   };
+
+  setUser(updatedUser);
+  localStorage.setItem("user", JSON.stringify(updatedUser));
+};
 
   const forceLogout = () => {
     setIsAuthenticated(false);

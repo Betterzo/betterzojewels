@@ -1,63 +1,167 @@
 "use client";
-import { useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { useAuth } from '@/contexts/AuthContext';
-import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
-import { User } from 'lucide-react';
+import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardBreadcrumb from "@/components/DashboardBreadcrumb";
+import { User } from "lucide-react";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import { LoadingPage } from "@/components/ui/loading";
 
 export default function ProfileClient() {
   const { user, updateUser } = useAuth();
+
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    city: user?.city || '',
-    state: user?.state || '',
-    zipCode: user?.zipCode || ''
+    name: "",
+    email: "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // ✅ Load user data safely
+  useEffect(() => {
+    if (user?.user) {
+      setProfileData({
+        name: user.user.name || "",
+        email: user.user.email || "",
+      });
+    }
+  }, [user]);
+
+  // ---------------- PROFILE ----------------
+
+  const handleProfileChange = (e) => {
     setProfileData({
       ...profileData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleProfileSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!profileData.name.trim()) {
+    toast.error("Name is required");
+    return;
+  }
+
+  if (profileData.name === user?.user?.name) {
+    toast.info("No changes detected");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await api.post(
+      "/update-profile",
+      {
+        name: profileData.name.trim(), // ✅ body
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`, // ✅ header
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      toast.success("Profile updated successfully!");
+
+      updateUser({ name: profileData.name.trim() });
+    }
+  } catch (error) {
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to update profile"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // ---------------- PASSWORD ----------------
+
+  const handlePasswordChange = (e) => {
     setPasswordData({
       ...passwordData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    updateUser(profileData);
-    console.log('Profile updated:', profileData);
+
+    if (!passwordData.currentPassword) {
+      return toast.error("Current password required");
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      return toast.error("New password must be at least 6 characters");
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      return toast.error("New password and confirmation do not match");
+    }
+    if(passwordData.newPassword === passwordData.currentPassword) {
+      return toast.error("New password cannot be the same as current password");
+    }
+
+    try {
+      setPasswordLoading(true);
+
+      const res = await api.post("/user/change-password", {
+        current_password: passwordData.currentPassword,
+        password: passwordData.newPassword,
+        password_confirmation: passwordData.confirmPassword,
+      },{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+      });
+
+      if (res.status === 200) {
+        toast.success("Password changed successfully!");
+
+        // ✅ reset form
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to change password"
+      );
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Password change requested');
-  };
+  // ---------------- UI ----------------
+
+  if (!user) {
+    return <div><LoadingPage /></div>;
+  }
 
   return (
-    <ProtectedRoute>
+   <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
         <Header />
         <div className="container mx-auto px-4 py-8">
@@ -86,26 +190,18 @@ export default function ProfileClient() {
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleProfileSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <form onSubmit={handleProfileSubmit} className="space-y-4 py-2">
+                    <div className="">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="name">First Name</Label>
                         <Input
-                          id="firstName"
-                          name="firstName"
-                          value={profileData.firstName}
+                          id="name"
+                          name="name"
+                          value={profileData.name}
                           onChange={handleProfileChange}
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          name="lastName"
-                          value={profileData.lastName}
-                          onChange={handleProfileChange}
-                        />
-                      </div>
+                      
                     </div>
                     <div>
                       <Label htmlFor="email">Email</Label>
@@ -118,55 +214,9 @@ export default function ProfileClient() {
                         disabled
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={profileData.phone}
-                        onChange={handleProfileChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="address">Address</Label>
-                      <Input
-                        id="address"
-                        name="address"
-                        value={profileData.address}
-                        onChange={handleProfileChange}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          name="city"
-                          value={profileData.city}
-                          onChange={handleProfileChange}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="state">State</Label>
-                        <Input
-                          id="state"
-                          name="state"
-                          value={profileData.state}
-                          onChange={handleProfileChange}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="zipCode">ZIP Code</Label>
-                        <Input
-                          id="zipCode"
-                          name="zipCode"
-                          value={profileData.zipCode}
-                          onChange={handleProfileChange}
-                        />
-                      </div>
-                    </div>
+                    
                     <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
-                      Update Profile
+                     {loading? "Updating..." : "Update Profile"}
                     </Button>
                   </form>
                 </CardContent>
@@ -211,7 +261,7 @@ export default function ProfileClient() {
                       />
                     </div>
                     <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
-                      Change Password
+                     {passwordLoading ? "Changing..." : "Change Password"}
                     </Button>
                   </form>
                 </CardContent>
@@ -223,4 +273,4 @@ export default function ProfileClient() {
       </div>
     </ProtectedRoute>
   );
-} 
+}
