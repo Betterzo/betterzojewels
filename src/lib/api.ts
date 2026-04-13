@@ -389,6 +389,24 @@ export const getOrderByNumber = async (orderNumber: string) => {
   return res.data.data;
 };
 
+export const downloadOrderInvoice = async (orderId: string) => {
+  const token = localStorage.getItem('auth_token'); 
+  const res = await api.get(`/orders/${orderId}/invoice`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/pdf,application/json'
+    },
+    responseType: 'blob',
+  });
+   const contentType = res.headers['content-type'];
+   if(contentType && contentType.includes('application/json')){
+    const text = await res.data.text();
+    const error= JSON.parse(text);
+    throw new Error(error.message || 'Failed to download invoice');
+   }
+   return res.data; // return the blob data for the invoice
+}
+
 // Payment verification and order update API functions
 export const verifyPaymentAndUpdateOrder = async (paymentData: {
   razorpay_payment_id: string;

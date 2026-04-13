@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { getOrderByNumber } from '@/lib/api';
+import api, { downloadOrderInvoice, getOrderByNumber } from '@/lib/api';
 import Link from 'next/link';
 import { 
   ArrowLeft, 
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
 import { OrderCardSkeleton } from '@/components/ui/skeletons';
+import { toast } from 'sonner';
 
 interface OrderDetailClientProps {
   orderNumber: string;
@@ -35,6 +36,7 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -132,6 +134,30 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
       </ProtectedRoute>
     );
   }
+
+  const handleDownloadInvoice = async() => {
+    setDownloading(true);
+    try{
+         const blob= await downloadOrderInvoice(order.id);
+         const url = window.URL.createObjectURL(new Blob([blob]));
+         const link = document.createElement('a');
+         link.href=url;
+         link.download=`invoice_${order.order_number || order.id}.pdf`;      
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+       toast.success("Invoice downloaded successfully");  
+    }  catch(error:any){
+      console.error('Error downloading invoice:', error);
+      toast.error(error.response?.data?.message || 'Failed to download invoice');
+    }
+    finally{
+      setDownloading(false);
+    }
+
+  };
+
 
   return (
     <ProtectedRoute>
@@ -279,7 +305,9 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full"
+                      onClick={handleDownloadInvoice}
+                    >
                       Download Invoice
                     </Button>
                     {/* {order.status === 'delivered' && (
