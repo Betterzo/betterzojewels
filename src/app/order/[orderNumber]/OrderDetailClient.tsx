@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { getOrderByNumber } from '@/lib/api';
+import Link from 'next/link';
 import { 
   ArrowLeft, 
   Package, 
@@ -20,7 +21,8 @@ import {
   Phone,
   User,
   ShoppingBag,
-  Clock
+  Clock,
+
 } from 'lucide-react';
 import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
 import { OrderCardSkeleton } from '@/components/ui/skeletons';
@@ -280,7 +282,7 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                     <Button variant="outline" className="w-full">
                       Download Invoice
                     </Button>
-                    {order.status === 'delivered' && (
+                    {/* {order.status === 'delivered' && (
                       <Button variant="outline" className="w-full">
                         Reorder Items
                       </Button>
@@ -289,9 +291,12 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                       <Button variant="outline" className="w-full">
                         Track Package
                       </Button>
-                    )}
+                    )} */}
+
                     <Button variant="outline" className="w-full">
+                    <Link href={"/contact-us"} >
                       Contact Support
+                    </Link>
                     </Button>
                   </div>
                 </CardContent>

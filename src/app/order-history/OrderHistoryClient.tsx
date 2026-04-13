@@ -20,6 +20,7 @@ export default function OrderHistoryClient() {
     const fetchOrders = async () => {
       try {
         const response = await getOrders();
+        console.log('Fetched orders:', response);
         setOrders(response || []);
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -142,7 +143,7 @@ export default function OrderHistoryClient() {
                     >
                       View Details
                     </Button>
-                    {order.status === 'delivered' && (
+                    {/* {order.status === 'delivered' && (
                       <Button variant="outline" size="sm">
                         Reorder
                       </Button>
@@ -151,7 +152,7 @@ export default function OrderHistoryClient() {
                       <Button variant="outline" size="sm">
                         Track Package
                       </Button>
-                    )}
+                    )} */}
                   </div>
                 </CardContent>
               </Card>
