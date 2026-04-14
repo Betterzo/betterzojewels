@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { getProductsPaginated } from "@/lib/api";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-export default function SearchClient() {
+export default function SearchClient({ initialQuery = "" }: { initialQuery?: string }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const query = (searchParams.get("q") || "").trim();
+  const [query, setQuery] = useState(initialQuery);
+  const [inputQuery, setInputQuery] = useState(initialQuery);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -20,20 +23,19 @@ export default function SearchClient() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    const fetchFirstPage = async () => {
-      if (!query) {
-        setProducts([]);
-        setLoading(false);
-        setLoadingMore(false);
-        setCurrentPage(1);
-        setLastPage(1);
-        setTotal(0);
-        return;
-      }
+    const nextQuery = (searchParams.get("q") || "").trim();
+    setQuery((prev) => (prev === nextQuery ? prev : nextQuery));
+    setInputQuery((prev) => (prev === nextQuery ? prev : nextQuery));
+  }, [searchParams]);
 
+  useEffect(() => {
+    const fetchFirstPage = async () => {
       try {
         setLoading(true);
-        const pageData = await getProductsPaginated({ search: query, page: 1 });
+        const pageData = await getProductsPaginated({
+          search: query || undefined,
+          page: 1,
+        });
         setProducts(Array.isArray(pageData.data) ? pageData.data : []);
         setCurrentPage(pageData.current_page || 1);
         setLastPage(pageData.last_page || 1);
@@ -51,13 +53,34 @@ export default function SearchClient() {
     fetchFirstPage();
   }, [query]);
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const nextQuery = inputQuery.trim();
+
+    router.push(
+      nextQuery ? `/search?q=${encodeURIComponent(nextQuery)}` : "/search"
+    );
+    setQuery(nextQuery);
+    setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setInputQuery("");
+    setQuery("");
+    setCurrentPage(1);
+    router.push("/search");
+  };
+
   const handleLoadMore = async () => {
-    if (!query || loadingMore || currentPage >= lastPage) return;
+    if (loadingMore || currentPage >= lastPage) return;
 
     try {
       setLoadingMore(true);
       const nextPage = currentPage + 1;
-      const pageData = await getProductsPaginated({ search: query, page: nextPage });
+      const pageData = await getProductsPaginated({
+        search: query || undefined,
+        page: nextPage,
+      });
       const nextProducts = Array.isArray(pageData.data) ? pageData.data : [];
 
       setProducts((prev) => {
@@ -88,6 +111,33 @@ export default function SearchClient() {
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">
             Search Results
           </h1>
+          <form onSubmit={handleSearchSubmit} className="mt-4 mb-4">
+            <div className="flex gap-2 max-w-2xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  type="search"
+                  value={inputQuery}
+                  onChange={(e) => setInputQuery(e.target.value)}
+                  placeholder="Search jewelry, gems, rings..."
+                  className="pl-10 pr-10 rounded-full border-purple-200"
+                />
+                {inputQuery && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <Button type="submit" className="rounded-full px-6">
+                Search
+              </Button>
+            </div>
+          </form>
           <p className="text-slate-600">
             {query ? (
               <>
@@ -99,7 +149,14 @@ export default function SearchClient() {
                 )}
               </>
             ) : (
-              "Please enter a search term."
+              <>
+                Showing all products
+                {total > 0 && (
+                  <span className="ml-2 text-slate-500">
+                    ({products.length} / {total})
+                  </span>
+                )}
+              </>
             )}
           </p>
         </div>

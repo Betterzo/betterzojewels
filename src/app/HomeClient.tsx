@@ -37,7 +37,7 @@ export default function HomeClient() {
         try{
           const res= await getCategories();
           setCategories(res);
-          // console.log("Fetched Categories:", res);
+          console.log("Fetched Categories:", res);
 
           const prodRes = await getProducts();
           setProducts(prodRes.slice(0, 4)); // Set only the first 4 products for featured

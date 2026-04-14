@@ -106,7 +106,7 @@ export const getBlogBySlug = async (slug: string): Promise<ApiBlogPost | null> =
 
 export const getCategories = async () => {
   const res = await api.get('/categories');
-  // console.log("categories", res.data.data.data); // log the categories data
+  // console.log("categories", res.data); // log the categories data
   return res.data.data.data; // returns the array of categories
 };
 
@@ -117,6 +117,7 @@ export const getProductsPaginated = async ({
   search?: string;
   page?: number;
 } = {}) => {
+  console.log("Fetching products with search:", search, "and page:", page); // log the search and page parameters
   const res = await api.get("/products", {
     params: {
       ...(search ? { search } : {}),

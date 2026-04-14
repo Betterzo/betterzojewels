@@ -3,11 +3,11 @@ import { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
+import CategoryChildrenSection from '@/components/CategoryChildrenSection';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CartProvider } from '@/contexts/CartContext';
 import { Search, X, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 interface Category {
@@ -16,6 +16,14 @@ interface Category {
   slug: string;
   description?: string;
   image?: string;
+  children?: Array<{
+    id: number;
+    name: string;
+    slug: string;
+    description?: string | null;
+    image?: string | null;
+    products?: Array<{ id: number; featured_image?: string | null }>;
+  }>;
 }
 
 interface CategoryClientProps {
@@ -160,6 +168,8 @@ export default function CategoryClient({ category, products }: CategoryClientPro
           </div>
         </div>
       </section>
+
+      <CategoryChildrenSection childrenCategories={category?.children || []} />
 
       {/* Modern Filter & Search Bar */}
       <section className="relative lg:sticky lg:top-24 z-40 bg-white/95 backdrop-blur-xl border-b border-purple-100/50 shadow-lg">
