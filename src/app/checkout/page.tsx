@@ -205,7 +205,7 @@ const CheckoutPage = () => {
       const backendAmount = Number(orderResponse.amount || 0);
       if (Math.abs(backendAmount - payableAmount) > 0.01) {
         toast.error(
-          `Amount mismatch detected. Expected ${payableAmount.toFixed(2)} but got ${backendAmount.toFixed(2)}.`
+          `Amount mismatch detected. Expected ₹${payableAmount.toFixed(2)} but got ₹${backendAmount.toFixed(2)}.`
         );
         return;
       }
@@ -498,7 +498,7 @@ const CheckoutPage = () => {
                     </Button>
                   </form>
                   {appliedCoupon && (
-                    <div className="text-green-600 text-sm mb-2">Coupon <b>{appliedCoupon}</b> applied! -${discount.toFixed(2)}</div>
+                    <div className="text-green-600 text-sm mb-2">Coupon <b>{appliedCoupon}</b> applied! -₹{discount.toFixed(2)}</div>
                   )}
                   {couponError && (
                     <div className="text-red-600 text-sm mb-2">{couponError}</div>
@@ -548,19 +548,19 @@ const CheckoutPage = () => {
                           <p className="font-medium text-sm">{item.name}</p>
                           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                         </div>
-                        <p className="font-medium">${(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</p>
                       </div>
                     ))}
                   </div>
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${subtotal.toLocaleString()}</span>
+                      <span>₹{subtotal.toLocaleString()}</span>
                     </div>
                     {discount > 0 && (
                       <div className="flex justify-between text-green-700">
                         <span>Discount</span>
-                        <span>- ${discount.toLocaleString()}</span>
+                        <span>- ₹{discount.toLocaleString()}</span>
                       </div>
                     )}
                     <div className="flex justify-between">
@@ -569,11 +569,11 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${tax.toFixed(0)}</span>
+                      <span>₹{tax.toFixed(0)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-semibold border-t pt-2">
                       <span>Total</span>
-                      <span className="text-emerald-800">${payableAmount.toLocaleString()}</span>
+                      <span className="text-emerald-800">₹{payableAmount.toLocaleString()}</span>
                     </div>
                   </div>
                   <form onSubmit={handleSubmit}>

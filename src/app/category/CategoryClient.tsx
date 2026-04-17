@@ -250,7 +250,7 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                     Price Range
                   </label>
                   <p className="text-sm text-slate-600 mb-3">
-                    ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+                    ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
                   </p>
                   <Slider
                     value={priceRange}
@@ -261,8 +261,8 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-slate-500 mt-2">
-                    <span>$0</span>
-                    <span>${maxPrice.toLocaleString()}</span>
+                    <span>₹0</span>
+                    <span>₹{maxPrice.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -309,6 +309,8 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                       featured_image: product.featured_image || product.images?.[0]?.image_url,
                       category: { name: product.category?.name || category.name },
                       quantity: 1,
+                      in_stock: product.in_stock,
+                      stock: product.stock ?? product.quantity ?? product.available_stock,
                       description: product.description
                     }} 
                   />

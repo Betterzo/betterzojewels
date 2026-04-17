@@ -157,9 +157,39 @@ export const getProducts = async (search?: string) => {
   return paginated.data || [];
 };
 
-export const getProductById = async (id: string | number) => {
-  const res = await api.get(`/product/${id}`);
-  return res.data.data; // returns the product object
+const normalizeProductId = (value: unknown, depth = 0): string => {
+  if (depth > 4) return "";
+
+  if (typeof value === "string" || typeof value === "number") {
+    const normalized = String(value).trim();
+    if (!normalized || normalized === "[object Object]") return "";
+    return normalized;
+  }
+
+  if (value && typeof value === "object") {
+    const maybeId =
+      (value as { id?: unknown; product_id?: unknown }).id ??
+      (value as { id?: unknown; product_id?: unknown }).product_id;
+    return normalizeProductId(maybeId, depth + 1);
+  }
+
+  return "";
+};
+
+export const getProductById = async (id: string | number | { id?: string | number; product_id?: string | number }) => {
+  const normalizedId = normalizeProductId(id);
+  if (!normalizedId) {
+    throw new Error("Invalid product id");
+  }
+  try {
+    const res = await api.get(`/product/${encodeURIComponent(normalizedId)}`);
+    return res.data.data; // returns the product object
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
 
 // OTP Authentication functions
@@ -207,7 +237,7 @@ export const getCategoryBySlug = async (slug: string) => {
         id: 0,
         name: formatCategoryName(slug),
         slug: slug,
-        description: `Browse ${formatCategoryName(slug)} at JewTone Online`,
+        description: `Browse ${formatCategoryName(slug)} at BetterZoJewels Online`,
         image: null
       };
     }

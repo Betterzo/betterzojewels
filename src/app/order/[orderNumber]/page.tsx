@@ -10,8 +10,8 @@ interface OrderDetailPageProps {
 export async function generateMetadata({ params }: OrderDetailPageProps): Promise<Metadata> {
   const { orderNumber } = await params;
   return {
-    title: `Order #${orderNumber} | JewTone Online`,
-    description: `View details and track your order #${orderNumber} on JewTone Online.`,
+    title: `Order #${orderNumber} | BetterZoJewels Online`,
+    description: `View details and track your order #${orderNumber} on BetterZoJewels Online.`,
     robots: {
       index: false,
       follow: true,

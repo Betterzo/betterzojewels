@@ -11,6 +11,8 @@ export interface CartItem {
   quantity: number;
   featured_image?: string;
   category?: string;
+  in_stock?: boolean;
+  stock?: number;
   // ...any other fields you need
 }
 
@@ -41,6 +43,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [wasAuthenticated, setWasAuthenticated] = useState(isAuthenticated);
   const [isLoading, setIsLoading] = useState(false);
   const pendingOperations = useRef<Set<string>>(new Set());
+
+  const parseStock = (value: unknown): number | undefined => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  };
+
+  const isOutOfStock = (item: { in_stock?: boolean; stock?: number }) => {
+    if (item.in_stock === false) return true;
+    if (typeof item.stock === 'number' && item.stock <= 0) return true;
+    return false;
+  };
 
   // Merge guest cart with server cart on login
   useEffect(() => {
@@ -107,8 +126,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         quantity: item.quantity,
         featured_image: item.product?.featured_image,
         category: item.product?.category?.name,
+        in_stock:
+          typeof item.product?.in_stock === 'boolean'
+            ? item.product.in_stock
+            : undefined,
+        stock:
+          parseStock(item.product?.stock) ??
+          parseStock(item.product?.quantity) ??
+          parseStock(item.product?.available_stock),
       }));
-      setItems(serverItems);
+      const availableItems = serverItems.filter((item: CartItem) => !isOutOfStock(item));
+      const outOfStockItems = serverItems.filter((item: CartItem) => isOutOfStock(item));
+      setItems(availableItems);
+
+      if (outOfStockItems.length > 0) {
+        await Promise.allSettled(
+          outOfStockItems
+            .filter((item: CartItem) => item.id > 0)
+            .map((item: CartItem) => apiRemoveCartItem(item.id))
+        );
+      }
     } catch (e) {
       setItems([]);
     } finally {
@@ -134,6 +171,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Add to cart with optimistic update
   const addToCart = async (item: Omit<CartItem, 'id' | 'quantity'> & { quantity?: number }) => {
     const operationId = `add_${item.product_id}`;
+
+    if (isOutOfStock(item)) {
+      throw new Error('OUT_OF_STOCK');
+    }
     
     // console.log('addToCart called with:', { item, isAuthenticated, operationId });
     
@@ -252,6 +293,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (isAuthenticated) {
+      const currentItem = items.find((item) => item.id === id);
+      if (currentItem && isOutOfStock(currentItem)) {
+        await removeFromCart(id);
+        return;
+      }
+
       if (quantity <= 0) {
         // Remove item if quantity is 0 or negative
         await removeFromCart(id);

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Search, User, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +12,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getCategories } from '@/lib/api';
 import { toast } from 'sonner';
 
+function HeaderSearchSync({
+  pathname,
+  onQueryChange,
+}: {
+  pathname: string;
+  onQueryChange: (value: string) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (pathname !== '/search') return;
+    const queryFromUrl = (searchParams.get('q') || '').trim();
+    onQueryChange(queryFromUrl);
+  }, [pathname, searchParams, onQueryChange]);
+
+  return null;
+}
+
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, logout } = useAuth();
   const { getItemCount, isLoading } = useCart();
 
@@ -42,6 +62,14 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-purple-100/50 shadow-md">
+      <Suspense fallback={null}>
+        <HeaderSearchSync
+          pathname={pathname}
+          onQueryChange={(queryFromUrl) =>
+            setSearchQuery((prev) => (prev === queryFromUrl ? prev : queryFromUrl))
+          }
+        />
+      </Suspense>
       <div className="container mx-auto px-4 lg:px-6">
 
         {/* Top Bar */}
@@ -53,10 +81,10 @@ const Header = () => {
             className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-purple-700 hover:to-pink-700 transition-all"
           >
             {/* <Sparkles className="h-7 w-7 text-purple-600" />
-            Jewtone */}
+            BetterZoJewels */}
             <img
               src="/logo-1.png"
-              alt="Jewtone Logo"
+              alt="BetterZoJewels Logo"
               className="h-24 w-64 object-contain bg-transparent"
             />
           </Link>
@@ -89,7 +117,7 @@ const Header = () => {
             <form onSubmit={handleSearch} className="hidden md:flex items-center">
               <div className="relative group">
                 <Input
-                  type="search"
+                  type="text"
                   placeholder="Search jewelry, gems, rings..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -102,7 +130,7 @@ const Header = () => {
                     className="absolute right-10 top-1/2 -translate-y-1/2 text-purple-500 hover:text-purple-700 transition-colors"
                     aria-label="Search products"
                   >
-                    <Search className="h-4 w-4" />
+                    {/* <Search className="h-4 w-4" /> */}
                   </button>
                 )}
                 {searchQuery && (

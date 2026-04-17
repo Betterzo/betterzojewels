@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Payment Successful | JewTone Online',
+  title: 'Payment Successful | BetterZoJewels Online',
   description: 'Your payment was successful. Your order is being processed and you will receive a confirmation shortly.',
   robots: {
     index: false,

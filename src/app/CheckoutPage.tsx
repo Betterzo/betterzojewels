@@ -247,7 +247,7 @@ const CheckoutPage = () => {
                         <p className="font-medium text-sm">{item.name}</p>
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-medium">${(item.price * item.quantity).toLocaleString()}</p>
+                      <p className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
@@ -255,7 +255,7 @@ const CheckoutPage = () => {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toLocaleString()}</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -263,11 +263,11 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>${tax.toFixed(0)}</span>
+                    <span>₹{tax.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
                     <span>Total</span>
-                    <span className="text-emerald-800">${total.toLocaleString()}</span>
+                    <span className="text-emerald-800">₹{total.toLocaleString()}</span>
                   </div>
                 </div>
                 

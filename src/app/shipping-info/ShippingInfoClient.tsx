@@ -23,7 +23,7 @@ export default function ShippingInfoClient() {
                     <li>Standard Shipping (5-7 business days)</li>
                     <li>Express Shipping (2-3 business days)</li>
                     <li>Overnight Shipping (1 business day)</li>
-                    <li>Free shipping on orders over $500</li>
+                    <li>Free shipping on orders over ₹500</li>
                   </ul>
                 </section>
                 <section>

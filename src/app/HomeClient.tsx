@@ -37,7 +37,7 @@ export default function HomeClient() {
         try{
           const res= await getCategories();
           setCategories(res);
-          console.log("Fetched Categories:", res);
+          // console.log("Fetched Categories:", res);
 
           const prodRes = await getProducts();
           setProducts(prodRes.slice(0, 4)); // Set only the first 4 products for featured
@@ -151,7 +151,7 @@ export default function HomeClient() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-5">
-            <Link href="/category/rings">
+            <Link href="/search">
               <Button className="bg-white text-purple-600 hover:bg-purple-50 rounded-full px-8 py-6 text-lg font-semibold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                 Shop Collection
               </Button>
@@ -226,7 +226,7 @@ export default function HomeClient() {
           </div>
 
           <div className="text-center mt-16">
-            <Link href="/category/rings">
+            <Link href="/search">
               <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full px-10 py-6 text-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-105">
                 View All Products
               </Button>

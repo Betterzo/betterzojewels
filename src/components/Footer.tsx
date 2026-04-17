@@ -16,11 +16,11 @@ const Footer = () => {
             <div className="flex items-center gap-2 mb-4">
               {/* <Sparkles className="h-6 w-6 text-pink-400" />
               <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wide">
-                Jewtone
+                BetterZoJewels
               </h3> */}
               <img
                 src="/logo.jpeg"
-                alt="Jewtone Logo"
+                alt="BetterZoJewels Logo"
                 className="h-24 w-48 object-contain  bg-transparent rounded-md shadow-lg"
               />
             </div>
@@ -107,7 +107,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="border-t border-purple-800/50 mt-10 pt-8 text-center">
           <p className="text-slate-400 text-sm">
-            © 2024 Jewtone. All rights reserved. |{' '}
+            © {new Date().getFullYear()} BetterZoJewels. All rights reserved. |{' '}
             <Link href="/privacy" className="hover:text-pink-400 transition-colors">Privacy Policy</Link>
             {' '}|{' '}
             <Link href="/terms" className="hover:text-pink-400 transition-colors">Terms of Service</Link>

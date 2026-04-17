@@ -4,8 +4,8 @@ import LoginClient from './LoginClient';
 import { LoadingPage } from '@/components/ui/loading';
 
 export const metadata: Metadata = {
-  title: 'Sign In | JewTone Online',
-  description: 'Sign in to your JewTone account to access your orders, wishlist, and personalized recommendations.',
+  title: 'Sign In | BetterZoJewels Online',
+  description: 'Sign in to your BetterZoJewels account to access your orders, wishlist, and personalized recommendations.',
   robots: {
     index: false,
     follow: true,

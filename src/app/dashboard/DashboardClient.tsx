@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { User, ShoppingBag, Heart, Settings, Package, Calendar, DollarSign, MapPin } from 'lucide-react';
+import { User, ShoppingBag, Heart, Settings, Package, Calendar, IndianRupee, MapPin } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { getOrders } from '@/lib/api';
@@ -75,7 +75,7 @@ export default function DashboardClient() {
           <DashboardBreadcrumb items={[]} />
           <div className="mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">My Account</h1>
-            <p className="text-slate-600 text-lg mt-2">Welcome back, {user?.name || user?.email}</p>
+            <p className="text-slate-600 text-lg mt-2">Welcome back, {user?.name || user?.user?.email}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Account Stats */}
@@ -88,10 +88,10 @@ export default function DashboardClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p><span className="font-medium">Email:</span> {user?.email}</p>
+                  <p><span className="font-medium">Email:</span> {user?.user?.email}</p>
                   <p><span className="font-medium">Member since:</span> 2024</p>
                   <p><span className="font-medium">Total orders:</span> {orders.length}</p>
-                  <p><span className="font-medium">Total spent:</span> ${totalSpent.toFixed(2)}</p>
+                  <p><span className="font-medium">Total spent:</span> ₹{totalSpent.toFixed(2)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -138,8 +138,8 @@ export default function DashboardClient() {
                               {order.items?.length || 0} items
                             </div>
                             <div className="flex items-center font-medium text-sm">
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              ${parseFloat(order.final_amount).toFixed(2)}
+                              <IndianRupee className="h-3 w-3 mr-1" />
+                              ₹{parseFloat(order.final_amount).toFixed(2)}
                             </div>
                           </div>
                         </div>

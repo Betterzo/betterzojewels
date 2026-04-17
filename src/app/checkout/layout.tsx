@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Checkout | JewTone Online',
+  title: 'Checkout | BetterZoJewels Online',
   description: 'Complete your jewelry purchase securely. Choose your shipping address and payment method.',
   robots: {
     index: false,

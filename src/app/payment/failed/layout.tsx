@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Payment Failed | JewTone Online',
+  title: 'Payment Failed | BetterZoJewels Online',
   description: 'Your payment could not be processed. Please try again or contact support for assistance.',
   robots: {
     index: false,

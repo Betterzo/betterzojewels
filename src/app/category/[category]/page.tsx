@@ -7,19 +7,19 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     const { category } = await params;
     const categoryData = await getCategoryBySlug(category);
     return {
-      title: `${categoryData.name} | JewTone Online`,
-      description: categoryData.description || `Browse premium ${categoryData.name.toLowerCase()} at JewTone Online. Discover handcrafted jewelry with secure payment options.`,
+      title: `${categoryData.name} | BetterZoJewels Online`,
+      description: categoryData.description || `Browse premium ${categoryData.name.toLowerCase()} at BetterZoJewels Online. Discover handcrafted jewelry with secure payment options.`,
       keywords: `${categoryData.name}, jewelry, ${categoryData.name.toLowerCase()}, premium jewelry, online jewelry`,
       openGraph: {
-        title: `${categoryData.name} | JewTone Online`,
-        description: categoryData.description || `Browse premium ${categoryData.name.toLowerCase()} at JewTone Online.`,
+        title: `${categoryData.name} | BetterZoJewels Online`,
+        description: categoryData.description || `Browse premium ${categoryData.name.toLowerCase()} at BetterZoJewels Online.`,
         type: 'website',
       },
     };
   } catch {
     return {
-      title: 'Shop by Category | JewTone Online',
-      description: 'Browse jewelry by category at JewTone Online. Discover rings, necklaces, earrings, bracelets, and more.',
+      title: 'Shop by Category | BetterZoJewels Online',
+      description: 'Browse jewelry by category at BetterZoJewels Online. Discover rings, necklaces, earrings, bracelets, and more.',
       keywords: 'jewelry, rings, necklaces, earrings, bracelets, category, shop jewelry',
     };
   }
@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       id: 0,
       name: formattedName,
       slug: category,
-      description: `Browse ${formattedName} at JewTone Online`,
+      description: `Browse ${formattedName} at BetterZoJewels Online`,
       image: null
     };
     return <CategoryClient category={fallbackCategory} products={[]} />;

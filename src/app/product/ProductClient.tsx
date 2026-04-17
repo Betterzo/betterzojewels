@@ -20,7 +20,7 @@ interface Product {
   description: string;
   price: number;
   featured_image: string;
-  images?: string[];
+  images?: Array<string | { image_url?: string; url?: string; image?: string }>;
   category?: {
     name: string;
     slug: string;
@@ -39,6 +39,31 @@ interface ProductClientProps {
   initialProduct?: Product | null;
 }
 
+const extractProductId = (value: unknown, depth = 0): string => {
+  if (depth > 4) return "";
+  if (typeof value === "string" || typeof value === "number") {
+    const normalized = String(value).trim();
+    if (!normalized || normalized === "[object Object]") return "";
+    return normalized;
+  }
+  if (value && typeof value === "object") {
+    const next =
+      (value as { id?: unknown; product_id?: unknown }).id ??
+      (value as { id?: unknown; product_id?: unknown }).product_id;
+    return extractProductId(next, depth + 1);
+  }
+  return "";
+};
+
+const getImageUrl = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object') {
+    const image = value as { image_url?: string; url?: string; image?: string };
+    return image.image_url || image.url || image.image || '';
+  }
+  return '';
+};
+
 export default function ProductClient({ productId, initialProduct }: ProductClientProps) {
   const router = useRouter();
   const { addToCart } = useCart();
@@ -48,6 +73,23 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
   const [loading, setLoading] = useState(!initialProduct);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+
+  const getNumericStock = (value: unknown): number | undefined => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return undefined;
+  };
+
+  const isOutOfStockProduct = (value: Product | null | undefined): boolean => {
+    if (!value) return true;
+    if (value.in_stock === false) return true;
+    const stock = getNumericStock(value.stock);
+    if (typeof stock === 'number' && stock <= 0) return true;
+    return false;
+  };
 
   useEffect(() => {
     if (!initialProduct && productId) {
@@ -61,6 +103,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
     try {
       setLoading(true);
       const productData = await getProductById(productId);
+      
       setProduct(productData);
       
       // Fetch related products
@@ -88,6 +131,10 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
       router.push('/login');
       return;
     }
+    if (isOutOfStockProduct(product)) {
+      toast.error('This item is out of stock');
+      return;
+    }
 
     try {
       await addToCart({
@@ -95,10 +142,16 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
         name: product!.name,
         price: product!.price,
         featured_image: product!.featured_image,
-        quantity: quantity
+        quantity: quantity,
+        in_stock: product?.in_stock,
+        stock: getNumericStock(product?.stock),
       });
       toast.success('Product added to cart!');
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message === 'OUT_OF_STOCK') {
+        toast.error('This item is out of stock');
+        return;
+      }
       toast.error('Failed to add product to cart');
     }
   };
@@ -109,6 +162,10 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
       router.push('/login');
       return;
     }
+    if (isOutOfStockProduct(product)) {
+      toast.error('This item is out of stock');
+      return;
+    }
 
     try {
       await addToCart({
@@ -116,10 +173,16 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
         name: product!.name,
         price: product!.price,
         featured_image: product!.featured_image,
-        quantity: quantity
+        quantity: quantity,
+        in_stock: product?.in_stock,
+        stock: getNumericStock(product?.stock),
       });
       router.push('/checkout');
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message === 'OUT_OF_STOCK') {
+        toast.error('This item is out of stock');
+        return;
+      }
       toast.error('Failed to add product to cart');
     }
   };
@@ -159,9 +222,15 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
       </div>
     );
   }
-
-  const images = product.images ? [product.featured_image, ...product.images] : [product.featured_image || '/dummy.jpg'];
-
+  // console.log('Rendering product:', product);
+  const images = (() => {
+    const featured = getImageUrl(product.featured_image);
+    const gallery = Array.isArray(product.images)
+      ? product.images.map((image) => getImageUrl(image)).filter(Boolean)
+      : [];
+    const unique = Array.from(new Set([featured, ...gallery].filter(Boolean)));
+    return unique.length > 0 ? unique : ['/dummy.jpg'];
+  })();
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
       <Header />
@@ -234,12 +303,15 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
             </div>
 
             <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ${Number(product.price).toLocaleString()}
+              ₹{Number(product.price).toLocaleString()}
             </div>
 
-            <div className="prose prose-sm text-slate-600 leading-relaxed">
-              <p>{product.description || 'No description available.'}</p>
-            </div>
+            <div
+              className="prose prose-sm max-w-none text-slate-600 leading-relaxed [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:text-xl [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-6 [&_li]:my-1"
+              dangerouslySetInnerHTML={{
+                __html: product.description || '<p>No description available.</p>',
+              }}
+            />
 
             {/* Product Specifications */}
             {(product.weight || product.dimensions || product.material) && (
@@ -295,18 +367,18 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                 <Button
                   onClick={handleAddToCart}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl font-semibold py-6"
-                  disabled={product.in_stock === false}
+                  disabled={isOutOfStockProduct(product)}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Add to Cart
+                  {isOutOfStockProduct(product) ? 'Out of Stock' : 'Add to Cart'}
                 </Button>
                 <Button
                   onClick={handleBuyNow}
                   variant="outline"
                   className="flex-1 border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white rounded-full transition-all duration-300 font-semibold py-6"
-                  disabled={product.in_stock === false}
+                  disabled={isOutOfStockProduct(product)}
                 >
-                  Buy Now
+                  {isOutOfStockProduct(product) ? 'Unavailable' : 'Buy Now'}
                 </Button>
                 <Button 
                   size="icon" 
@@ -317,7 +389,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                 </Button>
               </div>
 
-              {product.in_stock === false && (
+              {isOutOfStockProduct(product) && (
                 <p className="text-red-600 text-sm font-medium">This item is currently out of stock</p>
               )}
             </div>
@@ -330,7 +402,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-800">Free Shipping</p>
-                  <p className="text-xs text-slate-600">On orders over $50</p>
+                  <p className="text-xs text-slate-600">On orders over ₹50</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 hover:bg-pink-100 transition-colors">
@@ -365,7 +437,13 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                 <Card 
                   key={relatedProduct.id} 
                   className="cursor-pointer hover:shadow-xl transition-all border-2 border-purple-100 hover:border-purple-300 bg-white rounded-2xl overflow-hidden group"
-                  onClick={() => router.push(`/product/${relatedProduct.id}`)}
+                  onClick={() => {
+                    const relatedId = extractProductId(
+                      relatedProduct.id ?? relatedProduct.product_id
+                    );
+                    if (!relatedId) return;
+                    router.push(`/product/${relatedId}`);
+                  }}
                 >
                   <div className="aspect-square overflow-hidden bg-gradient-to-br from-purple-50 to-pink-50">
                     <img
@@ -381,7 +459,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">{relatedProduct.name}</h3>
                     <p className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      ${Number(relatedProduct.price).toLocaleString()}
+                      ₹{Number(relatedProduct.price).toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>

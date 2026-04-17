@@ -5,7 +5,7 @@ import { FormSkeleton } from '@/components/ui/skeletons';
 import { LoadingPage } from '@/components/ui/loading';
 
 export const metadata: Metadata = {
-  title: 'My Addresses | JewTone Online',
+  title: 'My Addresses | BetterZoJewels Online',
   description: 'Manage your shipping and billing addresses for faster checkout and order delivery.',
   robots: {
     index: false,

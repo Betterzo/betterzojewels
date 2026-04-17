@@ -4,8 +4,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | JewTone Online',
-  description: 'Read JewTone Online\'s privacy policy to understand how we collect, use, and protect your personal information.',
+  title: 'Privacy Policy | BetterZoJewels Online',
+  description: 'Read BetterZoJewels Online\'s privacy policy to understand how we collect, use, and protect your personal information.',
   robots: {
     index: true,
     follow: true,

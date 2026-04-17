@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { getOrders } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import { Package, Calendar, DollarSign, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, ShoppingBag } from 'lucide-react';
 import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
 
 export default function OrderHistoryClient() {
@@ -100,7 +100,7 @@ export default function OrderHistoryClient() {
                         {order.status}
                       </Badge>
                       <p className="text-lg font-semibold text-emerald-800 mt-2">
-                        ${parseFloat(order.final_amount).toFixed(2)}
+                        ₹{parseFloat(order.final_amount).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -117,8 +117,8 @@ export default function OrderHistoryClient() {
                           <p className="text-gray-600">SKU: {item.sku} • Quantity: {item.quantity}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">${parseFloat(item.price).toFixed(2)}</p>
-                          <p className="text-sm text-gray-500">Subtotal: ${parseFloat(item.subtotal).toFixed(2)}</p>
+                          <p className="font-semibold">₹{parseFloat(item.price).toFixed(2)}</p>
+                          <p className="text-sm text-gray-500">Subtotal: ₹{parseFloat(item.subtotal).toFixed(2)}</p>
                         </div>
                       </div>
                     ))}

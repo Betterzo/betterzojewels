@@ -107,7 +107,7 @@ export const initializeRazorpayPayment = async (
       key: razorpayKey,
       amount: Math.round(orderData.amount * 100), // Razorpay expects amount in paise, ensure it's an integer
       currency: 'INR',
-      name: 'JewTone Online',
+      name: 'BetterZoJewels Online',
       description: `${orderData.order_id}`,
       order_id: orderData.rzpay_order_id, // Use the Razorpay order ID from backend
       prefill: {
