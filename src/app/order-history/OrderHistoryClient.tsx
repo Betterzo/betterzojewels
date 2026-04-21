@@ -62,7 +62,7 @@ export default function OrderHistoryClient() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20">
         <Header />
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8"> 
           <DashboardBreadcrumb 
             items={[
               {
