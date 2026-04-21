@@ -90,7 +90,7 @@ export default function CartClient() {
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-purple-100 mb-6">
                 <ShoppingBag className="h-12 w-12 text-purple-600" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Your Cart is Empty</h1>
+              <h1 className="text-4xl leading-[1.2] pb-2 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">Your Cart is Empty</h1>
               <p className="text-lg text-slate-600 mb-8">
                 Looks like you haven't added any items to your cart yet.
               </p>
@@ -117,7 +117,7 @@ export default function CartClient() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Shopping Cart</h1>
+          <h1 className="text-4xl leading-[1.2] pb-1 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Shopping Cart</h1>
           <p className="text-slate-600 mt-2 text-lg">
             {items.length} item{items.length !== 1 ? 's' : ''} in your cart
           </p>

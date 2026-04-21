@@ -15,7 +15,7 @@ export default function NotFound() {
             <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-purple-100 mb-6">
               <Search className="h-16 w-16 text-purple-600" />
             </div>
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-6xl  font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               404
             </h1>
             <h2 className="text-3xl font-bold text-slate-800 mb-4">Page Not Found</h2>

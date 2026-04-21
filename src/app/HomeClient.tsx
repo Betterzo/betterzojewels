@@ -173,9 +173,10 @@ export default function HomeClient() {
       <section className="py-24 bg-white/50 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-5xl leading-[1.2] pb-2 font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Shop by Category
             </h2>
+
             <p className="text-slate-600 max-w-xl mx-auto text-lg">
               Curated collections crafted for timeless beauty.
             </p>
@@ -239,7 +240,7 @@ export default function HomeClient() {
       <section className="py-24 bg-white/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-5xl leading-[1.2] pb-2 font-bold mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Crafted for Eternity
             </h2>
             <p className="text-slate-600 mb-6 leading-relaxed text-lg">
