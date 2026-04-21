@@ -27,7 +27,7 @@ export default function AddressesClient() {
 
           {/* Heading */}
           <div className="mb-10">
-            <h1 className="text-4xl leading-[1.2] pb-2 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center">
               <MapPin className="mr-3 h-9 w-9 text-purple-600" />
               My Addresses
             </h1>

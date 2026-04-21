@@ -74,7 +74,7 @@ export default function DashboardClient() {
         <div className="container mx-auto px-4 py-8">
           <DashboardBreadcrumb items={[]} />
           <div className="mb-8">
-            <h1 className="text-4xl leading-[1.2] pb-1 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">My Account</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">My Account</h1>
             <p className="text-slate-600 text-lg mt-2">Welcome back, {user?.name || user?.user?.email}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

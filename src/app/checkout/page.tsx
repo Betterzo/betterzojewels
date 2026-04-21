@@ -272,7 +272,7 @@ const CheckoutPage = () => {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-4xl leading-[1.2] pb-0 font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Checkout</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Checkout</h1>
             {user?.user && (
               <p className="text-slate-600 text-lg mt-2">
                 Welcome back, {user.user.name || user.user.email}! Your information has been pre-filled below.
