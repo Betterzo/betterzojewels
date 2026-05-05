@@ -23,6 +23,7 @@ import {
   Clock,
 
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
 import { OrderCardSkeleton } from '@/components/ui/skeletons';
 import { toast } from 'sonner';
@@ -200,7 +201,7 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                   {order.status}
                 </Badge>
                 <p className="text-2xl font-bold text-emerald-800 mt-2">
-                  ₹{parseFloat(order.final_amount).toFixed(2)}
+                  {formatCurrency(parseFloat(order.final_amount))}
                 </p>
               </div>
             </div>
@@ -229,8 +230,8 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                           <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-900">₹{parseFloat(item.price).toFixed(2)}</p>
-                          <p className="text-sm text-gray-500">Subtotal: ₹{parseFloat(item.subtotal).toFixed(2)}</p>
+                          <p className="font-semibold text-gray-900">{formatCurrency(parseFloat(item.price))}</p>
+                          <p className="text-sm text-gray-500">Subtotal: {formatCurrency(parseFloat(item.subtotal))}</p>
                         </div>
                       </div>
                     ))}
@@ -250,24 +251,24 @@ export default function OrderDetailClient({ orderNumber }: OrderDetailClientProp
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Subtotal:</span>
-                      <span>₹{parseFloat(order.total_amount).toFixed(2)}</span>
+                      <span>{formatCurrency(parseFloat(order.total_amount))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Discount:</span>
-                      <span>-₹{parseFloat(order.discount).toFixed(2)}</span>
+                      <span>{formatCurrency(-parseFloat(order.discount))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tax:</span>
-                      <span>₹{parseFloat(order.tax).toFixed(2)}</span>
+                      <span>{formatCurrency(parseFloat(order.tax))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Shipping:</span>
-                      <span>₹{parseFloat(order.shipping_charge).toFixed(2)}</span>
+                      <span>{formatCurrency(parseFloat(order.shipping_charge))}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold text-lg">
                       <span>Total:</span>
-                      <span className="text-emerald-800">₹{parseFloat(order.final_amount).toFixed(2)}</span>
+                      <span className="text-emerald-800">{formatCurrency(parseFloat(order.final_amount))}</span>
                     </div>
                   </div>
                 </CardContent>

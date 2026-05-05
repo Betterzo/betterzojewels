@@ -1,6 +1,8 @@
 // Razorpay payment gateway integration
 // This handles both online card payments and UPI payments through Razorpay
 
+import { APP_CURRENCY } from '@/lib/currency';
+
 export interface RazorpayOrderResponse {
   status: boolean;
   message: string;
@@ -105,8 +107,8 @@ export const initializeRazorpayPayment = async (
     // Razorpay configuration
     const options: RazorpayPaymentOptions = {
       key: razorpayKey,
-      amount: Math.round(orderData.amount * 100), // Razorpay expects amount in paise, ensure it's an integer
-      currency: 'INR',
+      amount: Math.round(orderData.amount * 100), // smallest currency unit (e.g. cents for USD)
+      currency: APP_CURRENCY.code,
       name: 'BetterZoJewels Online',
       description: `${orderData.order_id}`,
       order_id: orderData.rzpay_order_id, // Use the Razorpay order ID from backend
@@ -118,7 +120,8 @@ export const initializeRazorpayPayment = async (
       notes: {
         address: customerDetails.address || '',
         backend_order_id: orderData.order_id, // Store our backend order ID
-        amount: orderData.amount.toString()
+        amount: orderData.amount.toString(),
+        currency: APP_CURRENCY.code
       },
       theme: {
         color: '#059669' // Emerald color matching your theme
@@ -228,6 +231,7 @@ export const testRazorpayConfiguration = () => {
   console.log('Key exists:', !!key);
   console.log('Key value:', key);
   console.log('Key format valid:', key?.startsWith('rzp_'));
+  console.log('Checkout currency:', APP_CURRENCY.code);
   console.log('====================================');
 };
 

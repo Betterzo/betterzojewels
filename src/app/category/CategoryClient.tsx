@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search, X, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { formatCurrencyWhole } from '@/lib/currency';
 
 interface Category {
   id: number;
@@ -250,7 +251,7 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                     Price Range
                   </label>
                   <p className="text-sm text-slate-600 mb-3">
-                    ₹{priceRange[0].toLocaleString()} - ₹{priceRange[1].toLocaleString()}
+                    {formatCurrencyWhole(priceRange[0])} - {formatCurrencyWhole(priceRange[1])}
                   </p>
                   <Slider
                     value={priceRange}
@@ -261,8 +262,8 @@ export default function CategoryClient({ category, products }: CategoryClientPro
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-slate-500 mt-2">
-                    <span>₹0</span>
-                    <span>₹{maxPrice.toLocaleString()}</span>
+                    <span>{formatCurrencyWhole(0)}</span>
+                    <span>{formatCurrencyWhole(maxPrice)}</span>
                   </div>
                 </div>
 

@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
 import HomeClient from './HomeClient';
+import { freeShippingMetaFragment } from '@/lib/currency';
 
 export const metadata: Metadata = {
   title: 'Betterzojewels Online - Premium Jewelry Store | Rings, Necklaces, Earrings & More',
-  description: 'Discover our exclusive collection of premium jewelry. Shop for rings, necklaces, earrings, bracelets and more with secure payment options. Free shipping on orders over ₹50.',
+  description: `Discover our exclusive collection of premium jewelry. Shop for rings, necklaces, earrings, bracelets and more with secure payment options. ${freeShippingMetaFragment()}`,
   keywords: 'jewelry, rings, necklaces, earrings, bracelets, premium jewelry, online jewelry store, diamond jewelry, gold jewelry',
   openGraph: {
     title: 'Betterzojewels Online - Premium Jewelry Store',

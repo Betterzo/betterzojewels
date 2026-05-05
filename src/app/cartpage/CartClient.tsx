@@ -10,6 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { formatCurrencyWhole } from '@/lib/currency';
 
 export default function CartClient() {
   const router = useRouter();
@@ -156,7 +157,7 @@ export default function CartClient() {
               {item.category || 'Uncategorized'}
             </p>
             <p className="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ₹{Number(item.price).toLocaleString()}
+              {formatCurrencyWhole(Number(item.price))}
             </p>
 
             {/* Quantity Controls */}
@@ -219,7 +220,7 @@ export default function CartClient() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-slate-700">
                     <span className="font-medium">Subtotal ({items.length} items)</span>
-                    <span className="font-semibold">₹{getTotalPrice().toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrencyWhole(getTotalPrice())}</span>
                   </div>
                   <div className="flex justify-between text-slate-700">
                     <span className="font-medium">Shipping</span>
@@ -227,13 +228,13 @@ export default function CartClient() {
                   </div>
                   <div className="flex justify-between text-slate-700">
                     <span className="font-medium">Tax</span>
-                    <span className="font-semibold">₹{(getTotalPrice() * 0.03).toFixed(0)}</span>
+                    <span className="font-semibold">{formatCurrencyWhole(getTotalPrice() * 0.03)}</span>
                   </div>
                   <div className="border-t-2 border-purple-100 pt-3">
                     <div className="flex justify-between font-bold text-xl">
                       <span className="text-slate-800">Total</span>
                       <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        ₹{(getTotalPrice() + getTotalPrice() * 0.03).toLocaleString()}
+                        {formatCurrencyWhole(getTotalPrice() + getTotalPrice() * 0.03)}
                       </span>
                     </div>
                   </div>

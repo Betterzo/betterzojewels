@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CartProvider } from '@/contexts/CartContext';
+import { formatCurrency, FREE_SHIPPING_MIN_ORDER_AMOUNT } from '@/lib/currency';
 
 export default function ShippingInfoClient() {
   return (
@@ -23,7 +24,7 @@ export default function ShippingInfoClient() {
                     <li>Standard Shipping (5-7 business days)</li>
                     <li>Express Shipping (2-3 business days)</li>
                     <li>Overnight Shipping (1 business day)</li>
-                    <li>Free shipping on orders over ₹500</li>
+                    <li>Free shipping on orders over {formatCurrency(FREE_SHIPPING_MIN_ORDER_AMOUNT)}</li>
                   </ul>
                 </section>
                 <section>

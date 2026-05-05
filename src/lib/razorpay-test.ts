@@ -1,4 +1,6 @@
 // Simple Razorpay test for debugging
+import { APP_CURRENCY } from '@/lib/currency';
+
 export const testRazorpaySimple = () => {
   const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   
@@ -16,8 +18,8 @@ export const testRazorpaySimple = () => {
     // Simple test options
     const options = {
       key: key,
-      amount: 100, // ₹1 in paise
-      currency: 'INR',
+      amount: 100, // 1.00 in smallest currency unit for APP_CURRENCY
+      currency: APP_CURRENCY.code,
       name: 'Test Payment',
       description: 'Test Order',
       handler: function (response: any) {

@@ -13,6 +13,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { ShoppingCart, Heart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { ProductDetailSkeleton } from '@/components/ui/skeletons';
+import { formatCurrencyWhole, formatCurrency, FREE_SHIPPING_MIN_ORDER_AMOUNT } from '@/lib/currency';
 
 interface Product {
   id: number;
@@ -303,7 +304,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
             </div>
 
             <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ₹{Number(product.price).toLocaleString()}
+              {formatCurrencyWhole(Number(product.price))}
             </div>
 
             <div
@@ -402,7 +403,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-800">Free Shipping</p>
-                  <p className="text-xs text-slate-600">On orders over ₹50</p>
+                  <p className="text-xs text-slate-600">On orders over {formatCurrency(FREE_SHIPPING_MIN_ORDER_AMOUNT)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-pink-50 hover:bg-pink-100 transition-colors">
@@ -459,7 +460,7 @@ export default function ProductClient({ productId, initialProduct }: ProductClie
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">{relatedProduct.name}</h3>
                     <p className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      ₹{Number(relatedProduct.price).toLocaleString()}
+                      {formatCurrencyWhole(Number(relatedProduct.price))}
                     </p>
                   </CardContent>
                 </Card>

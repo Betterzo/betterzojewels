@@ -1,5 +1,6 @@
 import axios from "axios";
 import { connect } from "http2";
+import { APP_CURRENCY } from '@/lib/currency';
 
 const api = axios.create({
   // baseURL: "http://localhost:9000/api/v1",
@@ -375,7 +376,7 @@ export const placeOrder = async (orderData: {
   rzpay_order_id: string;
 }> => {
   const token = localStorage.getItem('auth_token');
-  const res = await api.post('/checkout', orderData, {
+  const res = await api.post('/checkout', { ...orderData, currency: APP_CURRENCY.code }, {
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -447,7 +448,7 @@ export const verifyPaymentAndUpdateOrder = async (paymentData: {
   amount: number;
 }) => {
   const token = localStorage.getItem('auth_token');
-  const res = await api.post('/k/payment/verify', paymentData, {
+  const res = await api.post('/k/payment/verify', { ...paymentData, currency: APP_CURRENCY.code }, {
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',

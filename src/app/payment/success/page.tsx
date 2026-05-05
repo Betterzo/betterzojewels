@@ -12,6 +12,7 @@ import { verifyPaymentAndUpdateOrder, getPaymentStatus } from '@/lib/api';
 import { PageSkeleton } from '@/components/ui/skeletons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCart } from '@/contexts/CartContext';
+import { formatCurrency } from '@/lib/currency';
 
 const PaymentSuccessContent = () => {
   const router = useRouter();
@@ -217,7 +218,9 @@ const PaymentSuccessContent = () => {
                     {paymentDetails?.amount && (
                       <div className="flex justify-between">
                         <span className="text-gray-600">Amount:</span>
-                        <span className="font-semibold text-green-700">₹{paymentDetails.amount}</span>
+                        <span className="font-semibold text-green-700">
+                          {formatCurrency(Number(paymentDetails.amount) || 0)}
+                        </span>
                       </div>
                     )}
                     {paymentDetails?.serverVerified !== undefined && (

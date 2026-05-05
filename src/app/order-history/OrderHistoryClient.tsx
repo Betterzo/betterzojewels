@@ -10,6 +10,7 @@ import { getOrders } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import { Package, Calendar, ShoppingBag } from 'lucide-react';
 import DashboardBreadcrumb from '@/components/DashboardBreadcrumb';
+import { formatCurrency } from '@/lib/currency';
 
 export default function OrderHistoryClient() {
   const router = useRouter();
@@ -100,7 +101,7 @@ export default function OrderHistoryClient() {
                         {order.status}
                       </Badge>
                       <p className="text-lg font-semibold text-emerald-800 mt-2">
-                        ₹{parseFloat(order.final_amount).toFixed(2)}
+                        {formatCurrency(parseFloat(order.final_amount))}
                       </p>
                     </div>
                   </div>
@@ -117,8 +118,8 @@ export default function OrderHistoryClient() {
                           <p className="text-gray-600">SKU: {item.sku} • Quantity: {item.quantity}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">₹{parseFloat(item.price).toFixed(2)}</p>
-                          <p className="text-sm text-gray-500">Subtotal: ₹{parseFloat(item.subtotal).toFixed(2)}</p>
+                          <p className="font-semibold">{formatCurrency(parseFloat(item.price))}</p>
+                          <p className="text-sm text-gray-500">Subtotal: {formatCurrency(parseFloat(item.subtotal))}</p>
                         </div>
                       </div>
                     ))}

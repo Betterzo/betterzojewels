@@ -5,6 +5,7 @@ import { ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { formatCurrencyWhole } from '@/lib/currency';
 
 interface Product {
   id: number;
@@ -121,7 +122,7 @@ return (
       <div className="flex items-center justify-between pt-4 border-t border-purple-100/50 mt-auto">
         <div>
           <span className="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            ₹{product.price.toLocaleString()}
+            {formatCurrencyWhole(product.price)}
           </span>
         </div>
 

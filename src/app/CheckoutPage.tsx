@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCart } from '@/contexts/CartContext';
+import { formatCurrencyWhole } from '@/lib/currency';
 
 const CheckoutPage = () => {
   const { items, getTotalPrice } = useCart();
@@ -247,7 +248,7 @@ const CheckoutPage = () => {
                         <p className="font-medium text-sm">{item.name}</p>
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-medium">₹{(item.price * item.quantity).toLocaleString()}</p>
+                      <p className="font-medium">{formatCurrencyWhole(item.price * item.quantity)}</p>
                     </div>
                   ))}
                 </div>
@@ -255,7 +256,7 @@ const CheckoutPage = () => {
                 <div className="border-t pt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
+                    <span>{formatCurrencyWhole(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -263,11 +264,11 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>₹{tax.toFixed(0)}</span>
+                    <span>{formatCurrencyWhole(tax)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold border-t pt-2">
                     <span>Total</span>
-                    <span className="text-emerald-800">₹{total.toLocaleString()}</span>
+                    <span className="text-emerald-800">{formatCurrencyWhole(total)}</span>
                   </div>
                 </div>
                 
